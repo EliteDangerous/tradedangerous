@@ -142,7 +142,7 @@ class TradeCalc(object):
 
     # How fast do we expect stock to increase
     # My estimate is +5% every 60s.
-    stockIncreaseRate = 0.05
+    stockIncreaseRate = 0.0
     stockIncreaseInterval = 5 * 60
 
     def __init__(self, tdb, debug=0, capacity=None, maxUnits=None, margin=0.01, unique=False, fit=None):
