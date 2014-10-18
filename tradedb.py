@@ -319,7 +319,7 @@ class TradeDB(object):
 
             query               -   Executes the specified SQL on the db and returns a cursor.
             fetch_all           -   Generator that yields all the rows retrieved by an sql cursor.
-            
+
         Static methods:
             distanceSq          -   Returns the square of the distance between two points.
             listSearch          -   Performs a partial-match search of a list for a value.
@@ -333,6 +333,20 @@ class TradeDB(object):
     defaultSQL = './data/TradeDangerous.sql'
     # File containing text description of prices
     defaultPrices = './data/TradeDangerous.prices'
+    # array containing standard tables, csvfilename and tablename
+    # WARNING: order is important because of dependencys!
+    defaultTables = [
+                      [ './data/Added.csv', 'Added' ],
+                      [ './data/System.csv', 'System' ],
+                      [ './data/Station.csv', 'Station' ],
+                      [ './data/Ship.csv', 'Ship' ],
+                      [ './data/ShipVendor.csv', 'ShipVendor' ],
+                      [ './data/Upgrade.csv', 'Upgrade' ],
+                      [ './data/UpgradeVendor.csv', 'UpgradeVendor' ],
+                      [ './data/Category.csv', 'Category' ],
+                      [ './data/Item.csv', 'Item' ],
+                      [ './data/AltItemNames.csv', 'AltItemNames' ]
+                    ]
 
 
     def __init__(self, dbFilename=None, sqlFilename=None, pricesFilename=None, debug=0):
@@ -340,6 +354,7 @@ class TradeDB(object):
         self.dbURI = str(self.dbPath)
         self.sqlPath = Path(sqlFilename or TradeDB.defaultSQL)
         self.pricesPath = Path(pricesFilename or TradeDB.defaultPrices)
+        self.importTables = TradeDB.defaultTables
         self.debug = debug
         self.conn = None
 
@@ -379,7 +394,7 @@ class TradeDB(object):
 
     def reloadCache(self):
         """
-            Checks if the .sql or .prices file is newer than the cache.
+            Checks if the .sql, .prices or *.csv files are newer than the cache.
         """
 
         if self.dbPath.exists():
@@ -397,20 +412,23 @@ class TradeDB(object):
 
             sqlTimestamp, pricesTimestamp = getMostRecentTimestamp(self.sqlPath), getMostRecentTimestamp(self.pricesPath)
 
-            if dbFileCreatedTimestamp > max(sqlTimestamp, pricesTimestamp):
-                # db is newer.
-                if self.debug > 1:
-                    print("- SQLite is up to date")
-                return
-
-            if self.debug:
-                print("* Rebuilding DB Cache [db:{}, sql:{}, prices:{}]".format(dbFileCreatedTimestamp, sqlTimestamp, pricesTimestamp))
+            # rebuild if the sql or prices file is more recent than the db file
+            if max(sqlTimestamp, pricesTimestamp) < dbFileCreatedTimestamp:
+                # sql and prices file are older than the db, db may be upto date,
+                # check if any of the table files have changed.
+                changedFiles = [ fileName for (fileName, _) in self.importTables if getMostRecentTimestamp(Path(fileName)) > dbFileCreatedTimestamp ]
+                if not changedFiles:
+                    if self.debug > 1: print("- DB Cache is up to date.")
+                    return
+                if self.debug: print("* Rebuilding DB Cache because of modified {}".format(', '.join(changedFiles)))
+            else:
+                if self.debug: print("* Rebuilding DB Cache [db:{}, sql:{}, prices:{}]".format(dbFileCreatedTimestamp, sqlTimestamp, pricesTimestamp))
         else:
             if self.debug:
                 print("* Building DB cache")
 
         import buildcache
-        buildcache.buildCache(dbPath=self.dbPath, sqlPath=self.sqlPath, pricesPath=self.pricesPath, debug=self.debug)
+        buildcache.buildCache(dbPath=self.dbPath, sqlPath=self.sqlPath, pricesPath=self.pricesPath, importTables=self.importTables, debug=self.debug)
 
 
     ############################################################
