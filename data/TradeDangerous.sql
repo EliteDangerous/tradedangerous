@@ -185,6 +185,32 @@ CREATE TABLE Price
  ) WITHOUT ROWID
 ;
 
+
+CREATE TABLE PriceHistory
+ (
+   item_id INTEGER NOT NULL,
+   station_id INTEGER NOT NULL,
+   ui_order INTEGER NOT NULL DEFAULT 0,
+   -- how many credits will the station pay for this item?
+   sell_to INTEGER NOT NULL,
+   -- how many credits must you pay to buy at this station?
+   buy_from INTEGER NOT NULL DEFAULT 0,
+   modified DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+   demand INTEGER DEFAULT -1,
+   demand_level INTEGER DEFAULT -1,
+   stock INTEGER DEFAULT -1,
+   stock_level INTEGER DEFAULT -1,
+
+   FOREIGN KEY (item_id) REFERENCES Item(item_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+   FOREIGN KEY (station_id) REFERENCES Station(station_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+ ) WITHOUT ROWID
+;
+
+
 -- Some views I use now and again.
 
 CREATE VIEW vPriceDataAge AS
