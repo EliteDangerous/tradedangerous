@@ -113,9 +113,9 @@ class UnitsAndLevel(object):
         'H': 3, 'h': 3, '3': 3,
     }
     # Split a <units>L<level> reading
-    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>-?\d+)$')
+    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>-\d+)$')
     # Split a <units><level> reading
-    splitAtRe = re.compile(r'^(?P<units>\d+)(?P<level>[\?lLmMhH])$')
+    splitAtRe = re.compile(r'^(?P<units>\d+)(?P<level>[\?LMH])$', re.IGNORECASE)
 
     def __init__(self, category, reading):
         if reading in (None, "unk", "-1L-1", "-1L0", "0L-1"):
@@ -125,7 +125,7 @@ class UnitsAndLevel(object):
         else:
             matches = self.splitLRe.match(reading) or self.splitAtRe.match(reading)
             if not matches:
-                raise ValueError("Invalid {} units/level value. Expected 'unk', <units>L<level> or <units>[LMH], got '{}'".format(category, reading))
+                raise ValueError("Invalid {} units/level value. Expected 'unk', <units>L<level> or <units>[\?LMH], got '{}'".format(category, reading))
             units, level = matches.group('units', 'level')
             try:
                 self.units, self.level = int(units), UnitsAndLevel.levels[level]
@@ -216,8 +216,7 @@ def priceLineNegotiator(priceFile, db, debug=0):
             if not matches:
                 matches = newItemPriceRe.match(text)
                 if not matches:
-                    print("Unrecognized line/syntax: {}".format(line))
-                    sys.exit(1)
+                    raise ValueError("Unrecognized line/syntax: {}".format(line))
 
             itemName, stationPaying, stationAsking, modified = matches.group('item'), int(matches.group('paying')), int(matches.group('asking')), matches.group('time')
             demand = UnitsAndLevel('demand', matches.group('demand'))
