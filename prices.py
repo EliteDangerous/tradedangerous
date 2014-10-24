@@ -33,9 +33,13 @@ def dumpPrices(dbFilename, withModified=False, withLevels=False, stationID=None,
         # check if there are prices for the station
         cur.execute("SELECT COUNT(*) FROM Price WHERE Price.station_id = {}".format(stationID))
         priceCount = cur.fetchone()[0]
+        # generate "now" for the timestamp
+        modifiedStamp = "NULL"
     else:
         # no station, no check
         priceCount = 1
+        # use old timestamp for the export
+        modifiedStamp = "Price.modified"
 
     stationClause = "1" if not stationID else "Station.station_id = {}".format(stationID)
     defaultDemandVal = 0 if defaultZero else -1
@@ -58,7 +62,7 @@ def dumpPrices(dbFilename, withModified=False, withLevels=False, stationID=None,
                     , Price.item_id
                     , Price.sell_to
                     , Price.buy_from
-                    , Price.modified
+                    , {modStamp}
                     , IFNULL(Price.demand, {defDemand})
                     , IFNULL(Price.demand_level, {defDemand})
                     , IFNULL(Price.stock, {defDemand})
@@ -68,7 +72,7 @@ def dumpPrices(dbFilename, withModified=False, withLevels=False, stationID=None,
                     AND Station.station_id = Price.station_id
                     AND (Item.category_id = Category.category_id) AND Item.item_id = Price.item_id
              ORDER  BY Station.system_id, Station.station_id, Category.name, Price.ui_order, Item.name
-        """.format(stationClause=stationClause, defDemand=defaultDemandVal))
+        """.format(modStamp=modifiedStamp, stationClause=stationClause, defDemand=defaultDemandVal))
 
     lastSys, lastStn, lastCat = None, None, None
 

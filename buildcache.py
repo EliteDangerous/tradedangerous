@@ -76,13 +76,13 @@ qtyLevelFrag = r"""
     unk                         # You can just write 'unknown'
 |   n/a                         # alias for 0L0
 |   -                           # alias for 0L0
-|   \d+[LMH]                    # Or <number><level> where level is L(ow), M(ed) or H(igh)
+|   \d+[\?LMH]                  # Or <number><level> where level is L(ow), M(ed) or H(igh)
 |   0                           # alias for n/a
 """
 newItemPriceRe = re.compile(r"""
 ^
     {base_f}
-\s+ 
+\s+
     # demand units and level
     (?P<demand> {qtylvl_f})
 \s+
@@ -106,16 +106,16 @@ class UnitsAndLevel(object):
     """
     # Map textual representations of levels back into integer values
     levels = {
-        '-1': -1,
+        '-1': -1, '?': -1,
         '0': 0, '-': 0,
-        'L': 1, '1': 1,
-        'M': 2, '2': 2,
-        'H': 3, '3': 3,
+        'L': 1, 'l': 1, '1': 1,
+        'M': 2, 'm': 2, '2': 2,
+        'H': 3, 'h': 3, '3': 3,
     }
     # Split a <units>L<level> reading
-    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>\d+)$')
+    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>-?\d+)$')
     # Split a <units><level> reading
-    splitAtRe = re.compile(r'^(?P<units>\d+)(?P<level>[LMH])$')
+    splitAtRe = re.compile(r'^(?P<units>\d+)(?P<level>[\?lLmMhH])$')
 
     def __init__(self, category, reading):
         if reading in (None, "unk", "-1L-1", "-1L0", "0L-1"):
