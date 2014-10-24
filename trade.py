@@ -568,6 +568,7 @@ def editUpdate(args, stationID):
     import prices
     import subprocess
     import os
+    from misc import gen_csv
 
     editor, editorArgs = args.editor, []
     if args.sublime:
@@ -651,6 +652,8 @@ def editUpdate(args, stationID):
 
         with tdb.pricesPath.open("w") as pricesFile:
             prices.dumpPrices(args.db, withModified=True, withLevels=True, file=pricesFile, debug=args.debug)
+
+        gen_csv.exportTables(args.db, exportPath="./data/", exportTable="PriceHistory", debug=args.debug)
 
         # Update the DB file so we don't regenerate it.
         pathlib.Path(args.db).touch()
@@ -1023,7 +1026,7 @@ def main():
         raise CommandLineError("'--detail' (-v) and '--quiet' (-q) are mutually exclusive.")
 
     # If a directory was specified, relocate to it.
-    # Otherwise, try to chdir to 
+    # Otherwise, try to chdir to
     if args.cwd:
         os.chdir(args.cwd)
     else:

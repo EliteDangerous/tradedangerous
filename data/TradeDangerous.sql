@@ -211,7 +211,7 @@ CREATE TABLE PriceHistory
    FOREIGN KEY (station_id) REFERENCES Station(station_id)
     ON UPDATE CASCADE
     ON DELETE CASCADE
- ) WITHOUT ROWID
+ )
 ;
 
 

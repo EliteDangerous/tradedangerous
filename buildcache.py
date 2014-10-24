@@ -243,6 +243,7 @@ def processPricesFile(db, pricesPath, stationID=None, debug=0):
 
     if stationID:
         if debug: print("* Deleting stale entries for {}".format(stationID))
+        db.execute("INSERT INTO PriceHistory SELECT * FROM Price WHERE station_id = {}".format(stationID))
         db.execute("DELETE FROM Price WHERE station_id = {}".format(stationID))
 
     try:

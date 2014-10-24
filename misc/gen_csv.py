@@ -31,15 +31,19 @@ def search_dict(list, key, val):
     for row in list:
         if row[key] == val: return row
 
-def main(debug=0):
+######################################################################
+# Main
+
+def exportTables(dbFilename, exportPath, exportTable=None, quiet=True, debug=0):
     # load the database
-    conn = sqlite3.connect("../data/TradeDangerous.db")
+    conn = sqlite3.connect(str(dbFilename))
     conn.row_factory = sqlite3.Row
 
     # for some tables the first two columns will be reversed
     reverseList = [ 'AltItemNames',
                     'Item',
                     'Price',
+                    'PriceHistory',
                     'ShipVendor',
                     'Station',
                     'UpgradeVendor'
@@ -47,20 +51,21 @@ def main(debug=0):
 
     # iterate over all tables
     tCursor = conn.cursor()
+    tableStmt = "NOT LIKE 'sqlite_%'" if not exportTable else "= '{}'".format(exportTable)
     for row in tCursor.execute("""
                                   SELECT name
                                     FROM sqlite_master
                                    WHERE type = 'table'
-                                     AND name NOT LIKE 'sqlite_%'
+                                     AND name {}
                                    ORDER BY name
-                               """):
+                               """.format(tableStmt)):
         tableName = row['name']
-        exportName = "{table}.csv".format(table=tableName)
+        exportName = "{path}{table}.csv".format(path=exportPath, table=tableName)
 
         # create CSV files
-        print("Export Table {table} to {file}".format(table=tableName, file=exportName))
+        if not quiet: print("Export Table {table} to {file}".format(table=tableName, file=exportName))
         with open(exportName, "w") as exportFile:
-            exportOut = csv.writer(exportFile, delimiter=",", quotechar="'", doublequote=True)
+            exportOut = csv.writer(exportFile, delimiter=",", quotechar="'", doublequote=True, lineterminator="\n")
 
             cur = conn.cursor()
             keyList = []
@@ -124,9 +129,10 @@ def main(debug=0):
             for line in cur.execute(sqlStmt):
                 lineCount += 1
                 exportOut.writerow(list(line))
-            print("* {count} {table}s exported".format(count=lineCount, table=tableName))
-            print()
+            if not quiet:
+                print("* {count} {table}s exported".format(count=lineCount, table=tableName))
+                print()
 
 
 if __name__ == "__main__":
-    main()
+    exportTables(dbFilename="../data/TradeDangerous.db", exportPath="./", quiet=False)
