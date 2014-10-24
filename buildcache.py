@@ -113,7 +113,7 @@ class UnitsAndLevel(object):
         'H': 3, 'h': 3, '3': 3,
     }
     # Split a <units>L<level> reading
-    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>-\d+)$')
+    splitLRe = re.compile(r'^(?P<units>\d+)L(?P<level>-?\d+)$')
     # Split a <units><level> reading
     splitAtRe = re.compile(r'^(?P<units>\d+)(?P<level>[\?LMH])$', re.IGNORECASE)
 
