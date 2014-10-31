@@ -166,7 +166,7 @@ def dumpPrices(dbFilename, elementMask, stationID=None, file=None, defaultZero=F
         if withSupply:
             # Is this item on sale?
             if toStn > 0:
-                demandStr = itemQtyAndLevel(-2, -2)
+                demandStr = itemQtyAndLevel(-1, -1)
                 stockStr  = itemQtyAndLevel(stock, stockLevel)
             else:
                 demandStr = itemQtyAndLevel(demand, demandLevel)
