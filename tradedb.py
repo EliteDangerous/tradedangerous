@@ -329,8 +329,12 @@ class TradeDB(object):
     # WARNING: order is important because of dependencies!
     defaultTables = [
                       [ './data/Added.csv', 'Added' ],
+                      [ './data/Attributes.csv', 'Attributes' ],
+                      [ './data/AttribValues.csv', 'AttribValues' ],
                       [ './data/System.csv', 'System' ],
+                      [ './data/SystemAttributes.csv', 'SystemAttributes' ],
                       [ './data/Station.csv', 'Station' ],
+                      [ './data/StationAttributes.csv', 'StationAttributes' ],
                       [ './data/Ship.csv', 'Ship' ],
                       [ './data/ShipVendor.csv', 'ShipVendor' ],
                       [ './data/Upgrade.csv', 'Upgrade' ],

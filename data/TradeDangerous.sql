@@ -30,6 +30,25 @@ CREATE TABLE Added
  );
 
 
+CREATE TABLE Attributes
+ (
+   attrib_id INTEGER PRIMARY KEY AUTOINCREMENT,
+   name TEXT COLLATE nocase,
+   relate TEXT COLLATE nocase,
+
+   UNIQUE(name)
+ );
+
+
+CREATE TABLE AttribValues
+ (
+   value_id INTEGER PRIMARY KEY AUTOINCREMENT,
+   name TEXT COLLATE nocase,
+
+   UNIQUE(name)
+ );
+
+
 CREATE TABLE System
  (
    system_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,6 +67,25 @@ CREATE TABLE System
  );
 
 
+CREATE TABLE SystemAttributes
+ (
+   system_id INTEGER NOT NULL,
+   attrib_id INTEGER NOT NULL,
+   value_id INTEGER,
+   value TEXT COLLATE nocase,
+
+   FOREIGN KEY (system_id) REFERENCES System(system_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE,
+   FOREIGN KEY (attrib_id) REFERENCES Attributes(attrib_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE,
+   FOREIGN KEY (value_id) REFERENCES AttribValues(value_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE
+);
+
+
 CREATE TABLE Station
  (
    station_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,6 +99,25 @@ CREATE TABLE Station
    	ON UPDATE CASCADE
    	ON DELETE CASCADE
  );
+
+
+CREATE TABLE StationAttributes
+ (
+   station_id INTEGER NOT NULL,
+   attrib_id INTEGER NOT NULL,
+   value_id INTEGER,
+   value TEXT COLLATE nocase,
+
+   FOREIGN KEY (station_id) REFERENCES Station(station_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE,
+   FOREIGN KEY (attrib_id) REFERENCES Attributes(attrib_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE
+   FOREIGN KEY (value_id) REFERENCES AttribValues(value_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE
+);
 
 
 CREATE TABLE Ship

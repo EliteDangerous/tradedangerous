@@ -1,0 +1,16 @@
+name@System.system_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+Asellus Primus,Allegiance,Independent,
+Asellus Primus,Economy,High Tech,
+Asellus Primus,Goverment,Corporate,
+Asellus Primus,Population,,50000
+Asellus Primus,Security,Medium,
+Eranin,Allegiance,Independent,
+Eranin,Economy,Agriculture,
+Eranin,Goverment,Communism,
+Eranin,Population,,450000
+Eranin,Security,Medium,
+Dahan,Allegiance,Federation,
+Dahan,Economy,Refinery,
+Dahan,Goverment,Confederacy,
+Dahan,Population,,4000
+Dahan,Security,Low,
