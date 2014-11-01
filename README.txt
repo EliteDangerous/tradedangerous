@@ -23,6 +23,11 @@ files from other commanders to fill out your database.
 == CHANGE LOG
 ==============================================================================
 
+v5.0.1 In Progress
+. (kfsone) Issue #49 Errors in Ambiguity Error
+. (kfsone) Issue #51 L and ? items weren't honoring qty limits
+. (kfsone) Issue #50 Interaction between -0 and demand for a sold item
+
 v5.0.0 Oct 31/2014
 . (kfsone) Initial Beta 3 changes
  - Improved the "corrections" system which facilitates changing names
