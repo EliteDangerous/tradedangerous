@@ -285,8 +285,8 @@ CREATE TABLE StationBuying
   item_id INTEGER NOT NULL,
   station_id INTEGER NOT NULL,
   price INTEGER CHECK (price > 0),
-  units INTEGER CHECK (units == -1 OR units > 0),
-  level INTEGER CHECK (level == -1 or level > 0),
+  units INTEGER CHECK (units == -1 OR units >= 0),
+  level INTEGER CHECK (level == -1 or level >= 0),
   modified DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
   PRIMARY KEY (item_id, station_id),
   FOREIGN KEY (item_id) REFERENCES Item(item_id)

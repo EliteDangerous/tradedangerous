@@ -550,7 +550,7 @@ def processPricesFile(tdenv, db, pricesPath, stationID=None, defaultZero=False):
             items.append([ stnID, itemID, uiOrder, modified ])
             if uiOrder > 0:
                 cr, units, level = price.sellTo, price.demand, price.demandLevel
-                if cr > 0 and units != 0 and level != 0:
+                if cr > 0:
                     buys.append([ stnID, itemID, cr, units, level, modified ])
                 cr, units, level = price.buyFrom, price.stock, price.stockLevel
                 if cr > 0 and units != 0 and level != 0:
