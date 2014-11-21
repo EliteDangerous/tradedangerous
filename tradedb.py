@@ -369,7 +369,6 @@ class TradeDB(object):
                       [ './data/Category.csv', 'Category' ],
                       [ './data/Item.csv', 'Item' ],
                       [ './data/AltItemNames.csv', 'AltItemNames' ],
-                      [ './data/PriceHistory.csv', 'PriceHistory' ]
                     ]
 
 
