@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 
 from __future__ import absolute_import, with_statement, print_function, division, unicode_literals
 
@@ -18,6 +18,7 @@ class EDStarQuery(object):
                 'filter':  {
                     'knownstatus': known,
                     'cr': confidence,
+                    'date': '2014-11-22',
                 }
             }
         }
