@@ -23,8 +23,8 @@ class UpdateGUI(tk.Canvas):
         sticky = 1 if cmdenv.alwaysOnTop else 0
 
         super().__init__(root, borderwidth=0, width=width, height=height)
-        root.geometry("{}x{}-0+0".format(
-                    width+32, height
+        root.geometry("{}x{}+-{}+0".format(
+                    width+32, height, width+50
                 ))
 
         self.root = root
@@ -130,7 +130,7 @@ class UpdateGUI(tk.Canvas):
             the first cell on the next line, or if
             we are at the bottom of the list, beep.
         """
-        
+
         item, row, value = self.query(itemName, pos)
         if not self.validate(item, row, value, pos):
             return
