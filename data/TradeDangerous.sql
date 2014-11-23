@@ -34,7 +34,6 @@ CREATE TABLE Attributes
  (
    attrib_id INTEGER PRIMARY KEY AUTOINCREMENT,
    name TEXT COLLATE nocase,
-   relate TEXT COLLATE nocase,
 
    UNIQUE(name)
  );
