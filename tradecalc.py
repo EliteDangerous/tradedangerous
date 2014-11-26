@@ -405,6 +405,7 @@ class TradeCalc(object):
             more profit, there's no point continuing the A->C->D path.
         """
 
+        tdb = self.tdb
         tdenv = self.tdenv
         avoidItems = getattr(tdenv, 'avoidItems', [])
         avoidPlaces = getattr(tdenv, 'avoidPlaces', [])
@@ -422,7 +423,7 @@ class TradeCalc(object):
                     if src.tradingWith is None
         ]
         if stationsNotYetLoaded:
-            self.tdb.loadStationTrades(stationsNotYetLoaded)
+            tdb.loadStationTrades(stationsNotYetLoaded)
 
         for route in routes:
             tdenv.DEBUG1("Route = {}", route.str())
@@ -431,7 +432,8 @@ class TradeCalc(object):
             startCr = credits + int(route.gainCr * safetyMargin)
             routeJumps = len(route.jumps)
 
-            for dest in src.getDestinations(
+            for dest in tdb.getDestinations(
+                                src,
                                 maxJumps=maxJumpsPer,
                                 maxLyPer=maxLyPer,
                                 avoidPlaces=avoidPlaces,
