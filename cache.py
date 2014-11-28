@@ -151,7 +151,7 @@ class DuplicateKeyError(BuildCacheBaseException):
     """
     def __init__(self, fromFile, lineNo, keyType, keyValue, prevLineNo):
         super().__init__(fromFile, lineNo,
-                "Second entry for {keytype} \"{keyval}\", "
+                "Second occurance of {keytype} \"{keyval}\", "
                 "previous entry at line {prev}.".format(
                     keytype=keyType,
                     keyval=keyValue,
@@ -245,26 +245,19 @@ class PriceEntry(namedtuple('PriceEntry', [
 def getSystemByNameIndex(cur):
     """ Build station index in STAR/Station notation """
     cur.execute("""
-            SELECT station_id, system.name, station.name
+            SELECT station_id,
+                    UPPER(system.name) || '/' || UPPER(station.name)
               FROM System
                    INNER JOIN Station
-                      ON System.system_id = Station.system_id
+                      USING (system_id)
         """)
-    return {
-        "{}/{}".format(sysName.upper(), stnName.upper()): ID
-            for (ID, sysName, stnName)
-            in cur
-    }
+    return { name: ID for (ID, name) in cur }
 
 
 def getCategoriesByNameIndex(cur):
     """ Build category name => id index """
     cur.execute("SELECT category_id, name FROM category")
-    return {
-        name: ID
-            for (ID, name)
-            in cur
-    }
+    return { name: ID for (ID, name) in cur }
 
 
 def testItemNamesUniqueAcrossCategories(cur):
@@ -630,10 +623,11 @@ def processImportFile(tdenv, db, importPath, tableName):
     fkeySelectStr = ("("
             "SELECT {newValue}"
             " FROM {table}"
-            " WHERE {table}.{column} = ?"
+            " WHERE {stmt}"
             ")"
     )
     uniquePfx = "unq:"
+    ignorePfx = "!"
 
     with importPath.open(encoding='utf-8') as importFile:
         csvin = csv.reader(importFile, delimiter=',', quotechar="'", doublequote=True)
@@ -643,18 +637,22 @@ def processImportFile(tdenv, db, importPath, tableName):
 
         # split up columns and values
         # this is necessqary because the insert might use a foreign key
-        columnNames = []
         bindColumns = []
         bindValues  = []
+        joinHelper  = []
         uniqueIndexes = []
         for (cIndex, cName) in enumerate(columnDefs):
             splitNames = cName.split('@')
             # is this a unique index?
             colName = splitNames[0]
             if colName.startswith(uniquePfx):
-                uniqueIndexes += [ (cIndex, dict()) ]
+                uniqueIndexes += [ cIndex ]
                 colName = colName[len(uniquePfx):]
-            columnNames.append(colName)
+            if colName.startswith(ignorePfx):
+                # this column is only used to resolve an FK
+                colName = colName[len(ignorePfx):]
+                joinHelper.append( "{}@{}".format(colName, splitNames[1]) )
+                continue
 
             if len(splitNames) == 1:
                 # no foreign key, straight insert
@@ -662,15 +660,22 @@ def processImportFile(tdenv, db, importPath, tableName):
                 bindValues.append('?')
             else:
                 # foreign key, we need to make a select
-                splitJoin    = splitNames[1].split('.')
-                joinTable    = splitJoin[0]
-                joinColumn   = splitJoin[1]
-                bindColumns.append(joinColumn)
+                splitJoin = splitNames[1].split('.')
+                joinTable = [ splitJoin[0] ]
+                joinStmt  = []
+                for joinRow in joinHelper:
+                    helperNames = joinRow.split('@')
+                    helperJoin = helperNames[1].split('.')
+                    joinTable.append( "INNER JOIN {} USING({})".format(helperJoin[0], helperJoin[1]) )
+                    joinStmt.append( "{}.{} = ?".format(helperJoin[0], helperNames[0]) )
+                joinHelper = []
+                joinStmt.append("{}.{} = ?".format(splitJoin[0], colName))
+                bindColumns.append(splitJoin[1])
                 bindValues.append(
                     fkeySelectStr.format(
                         newValue=splitNames[1],
-                        table=joinTable,
-                        column=colName,
+                        table=" ".join(joinTable),
+                        stmt=" AND ".join(joinStmt),
                     )
                 )
         # now we can make the sql statement
@@ -690,25 +695,35 @@ def processImportFile(tdenv, db, importPath, tableName):
 
         # import the data
         importCount = 0
+        uniqueIndex = dict()
 
         for linein in csvin:
             lineNo = csvin.line_num
             if len(linein) == columnCount:
                 tdenv.DEBUG1("       Values: {}", ', '.join(linein))
                 if deprecationFn: deprecationFn(linein, tdenv.debug)
-                for (colNo, index) in uniqueIndexes:
-                    colValue = linein[colNo].upper()
+                if uniqueIndexes:
+                    # Need to construct the actual unique index key as
+                    # something less likely to collide with manmade
+                    # values when it's a compound.
+                    keyValues = [
+                            str(linein[col]).upper()
+                            for col in uniqueIndexes
+                            ]
+                    key = ":!:".join(keyValues)
                     try:
-                        prevLineNo = index[colValue]
+                        prevLineNo = uniqueIndex[key]
                     except KeyError:
                         prevLineNo = 0
                     if prevLineNo:
+                        # Make a human-readable key
+                        key = "/".join(keyValues)
                         raise DuplicateKeyError(
                                 importPath, lineNo,
-                                columnNames[colNo], colValue,
+                                "entry", key,
                                 prevLineNo
                                 )
-                    index[colValue] = lineNo
+                    uniqueIndex[key] = lineNo
 
                 try:
                     db.execute(sql_stmt, linein)
@@ -727,6 +742,9 @@ def processImportFile(tdenv, db, importPath, tableName):
                         )
                     ) from None
                 importCount += 1
+            else:
+                if not tdenv.quiet:
+                    print("Wrong number of columns ({}:{}): {}".format(importPath, lineNo, ', '.join(linein)))
         db.commit()
         tdenv.DEBUG0("{count} {table}s imported",
                             count=importCount,
