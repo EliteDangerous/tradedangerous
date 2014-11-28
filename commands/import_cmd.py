@@ -18,16 +18,55 @@ name='import'
 epilog=None
 wantsTradeDB=True
 arguments = [
-    ParseArgument('filename', help='Name of the file to read.', type=str),
 ]
 switches = [
+    ParseArgument('filename',
+        help='Name of the file to read.',
+        type=str,
+        default=None,
+    ),
+    ParseArgument(
+        '--ignore-unknown', '-i',
+        default=False, action='store_true',
+        dest='ignoreUnknown',
+        help=(
+            "Data for systems, stations and items that are not "
+            "recognized is reported as warning but skipped."
+        ),
+    ),
 ]
 
 ######################################################################
 # Perform query and populate result set
 
 def run(results, cmdenv, tdb):
+    # If the filename specified was "-" or None, then go ahead
+    # and present the user with an open file dialog.
+    if not cmdenv.filename:
+        import tkinter
+        from tkinter.filedialog import askopenfilename
+        tk = tkinter.Tk()
+        tk.withdraw()
+        filetypes = (
+                ("TradeDangerous '.prices' Files", "*.prices"),
+                ("All Files", "*.*"),
+                )
+        filename = askopenfilename(
+                    title="Select the file to import",
+                    initialfile="TradeDangerous.prices",
+                    filetypes=filetypes,
+                    initialdir='.',
+                )
+        if not filename:
+            raise SystemExit("Aborted")
+        cmdenv.filename = filename
+
+    # check the file exists.
     filePath = Path(cmdenv.filename)
+    if not filePath.is_file():
+        raise CommandLineError("File not found: {}".format(
+                    str(filePath)
+                ))
     cache.importDataFromFile(tdb, cmdenv, filePath)
     return None
 

@@ -10,15 +10,17 @@ import commands.parsing
 from commands.commandenv import CommandEnv
 
 commandList = [
+
     'buildcache',
     'buy',
-    'local',
+    'export',
     'import',
+    'local',
     'nav',
     'run',
     'sell',
     'update',
-    'export',
+
 ]
 
 ######################################################################
@@ -49,7 +51,10 @@ def addArguments(group, options, required, topGroup=None):
             if option.args[0][0] == '-':
                 group.add_argument(*(option.args), required=required, **(option.kwargs))
             else:
-                group.add_argument(*(option.args), **(option.kwargs))
+                if required:
+                    group.add_argument(*(option.args), **(option.kwargs))
+                else:
+                    group.add_argument(*(option.args), nargs='?', **(option.kwargs))
 
 
 def import_module(cmdName):
