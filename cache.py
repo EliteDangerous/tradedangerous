@@ -79,17 +79,20 @@ qtyLevelFrag = r"""
 newItemPriceRe = re.compile(r"""
 ^
     {base_f}
-\s+
-    # demand units and level
-    (?P<demand> {qtylvl_f})
-\s+
-    # stock units and level
-    (?P<stock> {qtylvl_f})
-    # time is optional
-    (?:
+    (
     \s+
-        {time_f}
+        # demand units and level
+        (?P<demand> {qtylvl_f})
+    \s+
+        # stock units and level
+        (?P<stock> {qtylvl_f})
+        # time is optional
+        (?:
+        \s+
+            {time_f}
+        )?
     )?
+
 \s*
 $
 """.format(base_f=itemPriceFrag, qtylvl_f=qtyLevelFrag, time_f=timeFrag),
@@ -384,7 +387,8 @@ def genSQLFromPriceLines(tdenv, priceFile, db, defaultZero):
                     if not tdenv.ignoreUnknown:
                         raise ex
                     stationID = DELETED
-                    print(ex)
+                    if not tdenv.quiet:
+                        print(ex)
                     return
 
         # Check for duplicates
@@ -429,7 +433,8 @@ def genSQLFromPriceLines(tdenv, priceFile, db, defaultZero):
             ex = UnknownCategoryError(priceFile, lineNo, categoryName)
             if not tdenv.ignoreUnknown:
                 raise ex
-            print(ex)
+            if not tdenv.quiet:
+                print(ex)
             categoryID = DELETED
             return
 
@@ -473,7 +478,8 @@ def genSQLFromPriceLines(tdenv, priceFile, db, defaultZero):
                 ex = UnknownItemError(priceFile, lineNo, itemName)
                 if not tdenv.ignoreUnknown:
                     raise ex
-                print(ex)
+                if not tdenv.quiet:
+                    print(ex)
                 return
 
         # Check for duplicate items within the station.

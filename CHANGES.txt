@@ -2,6 +2,23 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
+v6.1.2 Nov 28 2014
+. (kfsone) "run" now accepts a system OR station as the destination
+. (kfsone) System/Station name lookups are more friendly again
+. (kfsone) '-q' now silences "unknown ..." warnings when importing with "-i"
+. (gazelle) Improvements to .CSV file handling,
+. (gazelle) Additional stations, data cleanup, etc.
+. (kfsone) Fix for importing data without demand/supply
+. (kfsone) Adding support for stations with the same name in diff systems
+. (kfsone) Removed import-from-maddavo.py
+. (kfsone) Added support for URLs in "import" sub-command
+. (kfsone) Added "--maddavo" option to "import" to import maddavo's data
+e.g.
+  trade.py import -i http://kfs.org/td/prices
+or
+  trade.py import -i --maddavo
+
+
 v6.1.1 Nov 27 2014
 Optimization:
 . (kfsone) Removed support for old pre v5 .prices files
