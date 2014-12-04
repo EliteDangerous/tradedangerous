@@ -1,4 +1,12 @@
 !name@System.system_id,name@Station.station_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+'Ekonir','Kubasov Orbital','Allegiance','Independent',''
+'Ekonir','Kubasov Orbital','Economy','Extraction',''
+'Ekonir','Kubasov Orbital','Economy','Refinery',''
+'Ekonir','Kubasov Orbital','Facility','Bulletin Board',''
+'Ekonir','Kubasov Orbital','Facility','Commodities',''
+'Ekonir','Kubasov Orbital','Facility','Refuel',''
+'Ekonir','Kubasov Orbital','Government','Feudal',''
+'Ekonir','Kubasov Orbital','Type','Unsanctioned Outpost',''
 'Ekonir','Morey Vision','Allegiance','Federation',''
 'Ekonir','Morey Vision','Economy','Extraction',''
 'Ekonir','Morey Vision','Economy','Refinery',''
