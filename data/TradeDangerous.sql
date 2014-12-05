@@ -115,8 +115,7 @@ CREATE TABLE StationAttributes
  (
    station_id INTEGER NOT NULL,
    attrib_id INTEGER NOT NULL,
-   value_id INTEGER,
-   value TEXT COLLATE nocase,
+   value_id INTEGER NOT NULL,
 
    FOREIGN KEY (station_id) REFERENCES Station(station_id)
      ON UPDATE CASCADE
