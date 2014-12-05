@@ -97,6 +97,17 @@ class System(object):
         self._rangeCache = None
 
 
+    def distToSq(self, other):
+        """
+            Calculate the square of the distance (in ly)
+            to a given other star.
+        """
+        dx2 = (self.posX - other.posX) ** 2
+        dy2 = (self.posY - other.posY) ** 2
+        dz2 = (self.posZ - other.posZ) ** 2
+        return (dx2 + dy2 + dz2)
+
+
     def name(self):
         return self.dbname.upper()
 
@@ -236,7 +247,7 @@ class TradeDB(object):
 
         Attributes:
             dbPath              -   Path object describing the db location.
-            dbURI               -   String representation of the db location (e.g. filename).
+            dbFilename          -   str(dbPath)
             conn                -   The database connection.
 
         Methods:
@@ -289,27 +300,30 @@ class TradeDB(object):
 
     def __init__(self,
                     tdenv=None,
-                    sqlFilename=None,
-                    pricesFilename=None,
-                    buildLinks=True,
-                    includeTrades=True,
+                    load=True,
+                    buildLinks=False,
+                    includeTrades=False,
                     debug=None,
                 ):
-        tdenv = tdenv or TradeEnv(debug=(debug or 0))
-        self.tdenv = tdenv
-        self.dbPath = Path(tdenv.dbFilename or TradeDB.defaultDB)
-        self.dbURI = str(self.dbPath)
-        self.sqlPath = Path(sqlFilename or TradeDB.defaultSQL)
-        self.pricesPath = Path(pricesFilename or TradeDB.defaultPrices)
-        self.importTables = TradeDB.defaultTables
         self.conn = None
         self.cur = None
         self.numLinks = None
         self.tradingCount = None
 
-        self.reloadCache()
+        self.tdenv = tdenv = tdenv or TradeEnv(debug=(debug or 0))
 
-        self.load(maxSystemLinkLy=tdenv.maxSystemLinkLy,
+        self.dbPath = Path(tdenv.dbFilename or TradeDB.defaultDB)
+        self.sqlPath = Path(tdenv.sqlFilename or TradeDB.defaultSQL)
+        self.pricesPath = Path(tdenv.pricesFilename or TradeDB.defaultPrices)
+        self.importTables = TradeDB.defaultTables
+
+        self.dbFilename = str(self.dbPath)
+        self.sqlFilename = str(self.sqlPath)
+        self.pricesFilename = str(self.pricesPath)
+
+        if load:
+            self.reloadCache()
+            self.load(maxSystemLinkLy=tdenv.maxSystemLinkLy,
                     buildLinks=buildLinks,
                     includeTrades=includeTrades,
                     )
@@ -323,7 +337,7 @@ class TradeDB(object):
         try:
             self.tdenv.DEBUG1("Connecting to DB")
             import sqlite3
-            conn = sqlite3.connect(self.dbURI)
+            conn = sqlite3.connect(self.dbFilename)
             conn.execute("PRAGMA foreign_keys=ON")
             return conn
         except ImportError as e:
@@ -383,13 +397,7 @@ class TradeDB(object):
         else:
             self.tdenv.DEBUG0("Building DB Cache")
 
-        cache.buildCache(
-                self.tdenv,
-                dbPath=self.dbPath,
-                sqlPath=self.sqlPath,
-                pricesPath=self.pricesPath,
-                importTables=self.importTables
-                )
+        cache.buildCache(self, self.tdenv)
 
 
     ############################################################
@@ -499,8 +507,9 @@ class TradeDB(object):
             Note: Returned distances are squared
         """
 
-        place = self.lookupPlace(system)
-        system = place.system if isinstance(system, Station) else place
+        if not isinstance(system, System):
+            place = self.lookupPlace(system)
+            system = place.system if isinstance(system, Station) else place
 
         # Yield what we already have
         if includeSelf:
@@ -1088,7 +1097,7 @@ class TradeDB(object):
         return srcStn.tradingWith[dstStn]
 
 
-    def load(self, dbFilename=None, maxSystemLinkLy=None, buildLinks=True, includeTrades=True):
+    def load(self, maxSystemLinkLy=None, buildLinks=True, includeTrades=True):
         """
             Populate/re-populate this instance of TradeDB with data.
             WARNING: This will orphan existing records you have

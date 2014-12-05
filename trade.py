@@ -42,11 +42,7 @@ def main(argv):
     cmdIndex = commands.CommandIndex()
     cmdenv = cmdIndex.parse(sys.argv)
 
-    if cmdenv.wantsTradeDB:
-        # load the database
-        tdb = tradedb.TradeDB(cmdenv, buildLinks=False, includeTrades=False)
-    else:
-        tdb = tradedb.TradeDB
+    tdb = tradedb.TradeDB(cmdenv, load=cmdenv.wantsTradeDB)
 
     results = cmdenv.run(tdb)
     if results:
@@ -58,9 +54,9 @@ def main(argv):
 
 if __name__ == "__main__":
     import sys
-    if sys.hexversion < 0x03040000:
+    if sys.hexversion < 0x03040100:
         raise SystemExit(
-            "Sorry: TradeDangerous requires Python 3.4 or higher.\n"
+            "Sorry: TradeDangerous requires Python 3.4.1 or higher.\n"
             "For assistance, see:\n"
             "\tFacebook Group: http://kfs.org/td/group\n"
             "\tBitbucket Page: http://kfs.org/td/source\n"
