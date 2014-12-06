@@ -273,28 +273,28 @@ class TradeDB(object):
             '[]()*+-.,{}:'
             )
     # The DB cache
-    defaultDB = './data/TradeDangerous.db'
+    defaultDB = 'TradeDangerous.db'
     # File containing SQL to build the DB cache from
-    defaultSQL = './data/TradeDangerous.sql'
+    defaultSQL = 'TradeDangerous.sql'
     # File containing text description of prices
-    defaultPrices = './data/TradeDangerous.prices'
+    defaultPrices = 'TradeDangerous.prices'
     # array containing standard tables, csvfilename and tablename
     # WARNING: order is important because of dependencies!
     defaultTables = [
-                      [ './data/Added.csv', 'Added' ],
-                      [ './data/Attributes.csv', 'Attributes' ],
-                      [ './data/AttribValues.csv', 'AttribValues' ],
-                      [ './data/System.csv', 'System' ],
-                      [ './data/SystemAttributes.csv', 'SystemAttributes' ],
-                      [ './data/Station.csv', 'Station' ],
-                      [ './data/StationAttributes.csv', 'StationAttributes' ],
-                      [ './data/Ship.csv', 'Ship' ],
-                      [ './data/ShipVendor.csv', 'ShipVendor' ],
-                      [ './data/Upgrade.csv', 'Upgrade' ],
-                      [ './data/UpgradeVendor.csv', 'UpgradeVendor' ],
-                      [ './data/Category.csv', 'Category' ],
-                      [ './data/Item.csv', 'Item' ],
-                      [ './data/AltItemNames.csv', 'AltItemNames' ],
+                      [ 'Added.csv', 'Added' ],
+                      [ 'Attributes.csv', 'Attributes' ],
+                      [ 'AttribValues.csv', 'AttribValues' ],
+                      [ 'System.csv', 'System' ],
+                      [ 'SystemAttributes.csv', 'SystemAttributes' ],
+                      [ 'Station.csv', 'Station' ],
+                      [ 'StationAttributes.csv', 'StationAttributes' ],
+                      [ 'Ship.csv', 'Ship' ],
+                      [ 'ShipVendor.csv', 'ShipVendor' ],
+                      [ 'Upgrade.csv', 'Upgrade' ],
+                      [ 'UpgradeVendor.csv', 'UpgradeVendor' ],
+                      [ 'Category.csv', 'Category' ],
+                      [ 'Item.csv', 'Item' ],
+                      [ 'AltItemNames.csv', 'AltItemNames' ],
                     ]
 
 
@@ -310,12 +310,13 @@ class TradeDB(object):
         self.numLinks = None
         self.tradingCount = None
 
-        self.tdenv = tdenv = tdenv or TradeEnv(debug=(debug or 0))
+        self.tdenv = tdenv or TradeEnv(debug=(debug or 0))
 
-        self.dbPath = Path(tdenv.dbFilename or TradeDB.defaultDB)
-        self.sqlPath = Path(tdenv.sqlFilename or TradeDB.defaultSQL)
-        self.pricesPath = Path(tdenv.pricesFilename or TradeDB.defaultPrices)
-        self.importTables = TradeDB.defaultTables
+        dataDir = Path(tdenv.dataDir).resolve()
+        self.dbPath = dataDir / Path(tdenv.dbFilename or TradeDB.defaultDB)
+        self.sqlPath = dataDir / Path(tdenv.sqlFilename or TradeDB.defaultSQL)
+        self.pricesPath = dataDir / Path(tdenv.pricesFilename or TradeDB.defaultPrices)
+        self.importTables = [(str(dataDir / Path(x[0])), x[1]) for x in TradeDB.defaultTables]
 
         self.dbFilename = str(self.dbPath)
         self.sqlFilename = str(self.sqlPath)
@@ -722,7 +723,7 @@ class TradeDB(object):
         # Nothing matched
         if not any([exactMatch, closeMatch, wordMatch, anyMatch]):
             raise TradeException("Unrecognized place: {}".format(name))
-    
+
         # More than one match
         raise AmbiguityError(
                     'System/Station', name,
