@@ -8,7 +8,7 @@ import math
 # Parser config
 
 help='Check item prices and report suspicious entries.'
-name='check'
+name='checkprices'
 epilog=None
 wantsTradeDB=True
 arguments = [
@@ -46,6 +46,18 @@ class StdDevFunc:
         else:
             return math.sqrt(self.S / (self.k-1))
 
+def buildPriceSQL(stmtList):
+    if len(stmtList) == 0:
+        return ""
+    else:
+        return "({stmt})".format(stmt=" OR ".join(stmtList))
+
+def buildPriceStmt(minPrice, maxPrice):
+    if minPrice == maxPrice:
+        return "(price = {})".format(minPrice)
+    else:
+        return "(price BETWEEN {} AND {})".format(minPrice, maxPrice)
+
 ######################################################################
 # Perform query and populate result set
 
@@ -60,76 +72,107 @@ def run(results, cmdenv, tdb):
     conn.create_aggregate("stddev", 1, StdDevFunc)
 
     # init
-    results.rows = []
-    devCount  = 99
-    devFactor = 3.5
+    checkCount  = cmdenv.detail
+    itemCursor  = conn.cursor()
     checkCursor = conn.cursor()
 
     # create temp result table
     tempCursor = conn.cursor()
     tempCursor.execute("""
-                          CREATE TEMP TABLE tmp_check
+                          CREATE TEMP TABLE tmp_result
                           (
                             station_id INTEGER,
                             item_id INTEGER
                           )
                        """)
 
-    # sql statement for average and standard deviation
+    # check if the stations pays more than it's asking
+    checkCursor.execute("""
+                           INSERT INTO tmp_result(station_id, item_id)
+                             SELECT vPrice.station_id, vPrice.item_id
+                               FROM vPrice
+                              WHERE vPrice.sell_to > vPrice.buy_from
+                                AND vPrice.buy_from > 0
+                        """)
+
+    # check if sell = buy = stock
+    checkCursor.execute("""
+                           INSERT INTO tmp_result(station_id, item_id)
+                             SELECT vPrice.station_id, vPrice.item_id
+                               FROM vPrice
+                              WHERE vPrice.sell_to > 0
+                                AND vPrice.sell_to = vPrice.buy_from
+                                AND vPrice.buy_from = vPrice.stock
+                        """)
+
+    # check if buy > sell * (4/3)
+    checkCursor.execute("""
+                           INSERT INTO tmp_result(station_id, item_id)
+                             SELECT vPrice.station_id, vPrice.item_id
+                               FROM vPrice
+                              WHERE vPrice.buy_from > round(vPrice.sell_to*4.0/3)
+                                AND vPrice.sell_to > {}
+                        """.format("-1" if cmdenv.detail > 1 else "0"))
+
+    # sql statement for rounded min/max check
     stmtAvgDev = """
-                    SELECT count(*), round(avg(price)), round(stddev(price))
-                      FROM {table} AS a
-                     WHERE item_id = ?
+                    SELECT item_id,
+                           CASE
+                             WHEN price < 10 THEN           price
+                             WHEN price < 100 THEN    ROUND(price*1.0/10)*10
+                             WHEN price < 1000 THEN   ROUND(price*1.0/100)*100
+                             WHEN price < 10000 THEN  ROUND(price*1.0/1000)*1000
+                             WHEN price < 100000 THEN ROUND(price*1.0/10000)*10000
+                             ELSE price
+                           END AS round_price,
+                           MIN(price) AS min_price,
+                           MAX(price) AS max_price,
+                           COUNT(*) AS count_price
+                      FROM {table}
+                     GROUP BY 1,2
                  """
 
     # sql statement for price checking
     stmtPrice = """
-                   INSERT INTO tmp_check(station_id, item_id)
-                     SELECT {table}.station_id, {table}.item_id
+                   INSERT INTO tmp_result(station_id, item_id)
+                     SELECT station_id, item_id
                        FROM {table}
-                      WHERE {table}.item_id = ?
-                        AND {table}.price NOT BETWEEN ? AND ?
+                      WHERE item_id = ?
+                        AND {badStmt}
                 """
 
-    for item in tdb.items():
-        # check if the stations pays more than it's asking
-        checkCursor.execute("""
-                               INSERT INTO tmp_check(station_id, item_id)
-                                 SELECT vPrice.station_id, vPrice.item_id
-                                   FROM vPrice
-                                  WHERE vPrice.item_id = ?
-                                    AND vPrice.sell_to > vPrice.buy_from
-                                    AND vPrice.buy_from > 0
-                            """, [ item.ID ])
+    # check rounded min/max for prices
+    for tableName in ('StationBuying', 'StationSelling'):
+        badStmt   = []
+        oldItemID = -1
+        for (itemID, dummy, minPrice, maxPrice, countPrice) in itemCursor.execute(stmtAvgDev.format(table=tableName)):
+            if oldItemID != itemID:
+                if len(badStmt) > 0:
+                    badSQL = buildPriceSQL(badStmt)
+                    cmdenv.DEBUG0(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
+                    checkCursor.execute(stmtPrice.format(table=tableName,
+                                                         badStmt=badSQL),
+                                        [ oldItemID ])
+                    del badStmt[:]
+                oldItemID = itemID
+            if countPrice > checkCount:
+                cmdenv.DEBUG0(", ".join(str(x) for x in (itemID, dummy, minPrice, maxPrice, countPrice))+" (good)")
+            else:
+                cmdenv.DEBUG0(", ".join(str(x) for x in (itemID, dummy, minPrice, maxPrice, countPrice))+" (bad)")
+                badStmt.append(buildPriceStmt(minPrice, maxPrice))
+        if len(badStmt) > 0:
+            badSQL = buildPriceSQL(badStmt)
+            cmdenv.DEBUG0(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
+            checkCursor.execute(stmtPrice.format(table=tableName,
+                                                 badStmt=badSQL),
+                                [ itemID ])
 
-        # check if sell = buy = stock
-        checkCursor.execute("""
-                               INSERT INTO tmp_check(station_id, item_id)
-                                 SELECT vPrice.station_id, vPrice.item_id
-                                   FROM vPrice
-                                  WHERE vPrice.item_id = ?
-                                    AND vPrice.sell_to > 0
-                                    AND vPrice.sell_to = vPrice.buy_from
-                                    AND vPrice.buy_from = vPrice.stock
-                            """, [ item.ID ])
-
-        # check average and standard deviation for prices
-        for tableName in ('StationBuying', 'StationSelling'):
-            checkCursor.execute(stmtAvgDev.format(table=tableName), [ item.ID ])
-            countPrice, avgPrice, devPrice = checkCursor.fetchone()
-            if countPrice > devCount and avgPrice and devPrice:
-                minPrice = avgPrice - devPrice*devFactor
-                maxPrice = avgPrice + devPrice*devFactor
-                print(item.dbname, countPrice, avgPrice, devPrice, minPrice, maxPrice)
-                checkCursor.execute(stmtPrice.format(table=tableName),
-                                    [ item.ID, minPrice, maxPrice ])
-
-    # sql statement for the result
+    # sql statement for the result list
     sqlStmt = """
                  SELECT DISTINCT Station.station_id, Item.item_id,
                                  IFNULL(sb.price, 0) AS sell_to,
                                  IFNULL(ss.price, 0) AS buy_from
-                   FROM tmp_check AS t
+                   FROM tmp_result AS t
                         INNER JOIN Item    USING(item_id)
                         INNER JOIN Category ON Category.category_id = Item.category_id
                         INNER JOIN Station USING(station_id)
@@ -141,6 +184,7 @@ def run(results, cmdenv, tdb):
                   ORDER BY System.name, Station.name, Category.name, Item.name
               """
 
+    results.rows = []
     for resRow in tempCursor.execute(sqlStmt):
         results.rows.append(resRow)
 
