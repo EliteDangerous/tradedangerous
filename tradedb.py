@@ -313,7 +313,7 @@ class TradeDB(object):
         self.tdenv = tdenv or TradeEnv(debug=(debug or 0))
 
         dataDir = Path(tdenv.dataDir).resolve()
-        self.dbPath = dataDir / Path(tdenv.dbFilename or TradeDB.defaultDB)
+        self.dbPath = Path(tdenv.dbFilename or dataDir / TradeDB.defaultDB)
         self.sqlPath = dataDir / Path(tdenv.sqlFilename or TradeDB.defaultSQL)
         self.pricesPath = dataDir / Path(tdenv.pricesFilename or TradeDB.defaultPrices)
         self.importTables = [(str(dataDir / Path(x[0])), x[1]) for x in TradeDB.defaultTables]
@@ -509,7 +509,9 @@ class TradeDB(object):
             Note: Returned distances are squared
         """
 
-        if not isinstance(system, System):
+        if isinstance(system, Station):
+            system = system.system
+        elif not isinstance(system, System):
             place = self.lookupPlace(system)
             system = place.system if isinstance(system, Station) else place
 
@@ -1004,9 +1006,6 @@ class TradeDB(object):
             Populate the "Trades" table for stations.
 
             A trade is a connection between two stations where the SRC station
-
-            Ignore items that have a ui_order of 0 (my way of indicating the item is
-            either unavailable or black market).
 
             NOTE: Trades MUST be loaded such that they are populated into the
             lists in descending order of profit (highest profit first)
