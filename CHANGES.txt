@@ -2,7 +2,15 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
+v6.1.7 Dec 07 2014
+. (kfsone) Added "scripts" directory with bash scripts
+  See scripts/README.txt
+. (kfsone) Allow bigger price differences for most costly items in the UI,
+  thanks to Bariri for the reports
+. (eggplant) More station data
+
 v6.1.6 Dec 06 2014
+. (gulasch) Station additions, corrections and distances
 . (kfsone) Added '--ages' option to "buy" command to show data age
 . (kfsone) Fix for line-numbers in .prices files sometimes being incorrect
 . (kfsone) Added "--start-jumps" (-s) option to "run" command which will
