@@ -43,6 +43,9 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'LTT 15574','Haxel Port','Viper',142931
 'Obambivas','Galouye Terminal','Orca',48539887
 'Obambivas','Galouye Terminal','Sidewinder',32000
+'Obambivas','Kennan Orbital','Cobra',379718
+'Obambivas','Kennan Orbital','Lakon Type 6',1045945
+'Obambivas','Kennan Orbital','Lakon Type 7',17472252
 'Yakabugai','Serebrov Station','Anaconda',146969451
 'Yakabugai','Serebrov Station','Asp Explorer',6661153
 'Yakabugai','Serebrov Station','Dropship',37814205
