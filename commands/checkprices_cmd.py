@@ -86,33 +86,41 @@ def run(results, cmdenv, tdb):
                           )
                        """)
 
+    stmtInsert = "INSERT INTO tmp_result(station_id, item_id) VALUES(?, ?)"
+
     # check if the stations pays more than it's asking
-    checkCursor.execute("""
-                           INSERT INTO tmp_result(station_id, item_id)
-                             SELECT vPrice.station_id, vPrice.item_id
+    for (stationID, itemID, sell, buy) in checkCursor.execute("""
+                             SELECT vPrice.station_id, vPrice.item_id,
+                                    vPrice.sell_to, vPrice.buy_from
                                FROM vPrice
                               WHERE vPrice.sell_to > vPrice.buy_from
                                 AND vPrice.buy_from > 0
-                        """)
+                        """):
+        cmdenv.DEBUG0("sell > buy: {:>7n} > {:>7n}".format(sell, buy))
+        tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # check if sell = buy = stock
-    checkCursor.execute("""
-                           INSERT INTO tmp_result(station_id, item_id)
-                             SELECT vPrice.station_id, vPrice.item_id
+    for (stationID, itemID, sell, buy) in checkCursor.execute("""
+                             SELECT vPrice.station_id, vPrice.item_id,
+                                    vPrice.sell_to, vPrice.buy_from
                                FROM vPrice
                               WHERE vPrice.sell_to > 0
                                 AND vPrice.sell_to = vPrice.buy_from
                                 AND vPrice.buy_from = vPrice.stock
-                        """)
+                        """):
+        cmdenv.DEBUG0("sell = buy = stock: {:>7n} = {:>7n}".format(sell, buy))
+        tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # check if buy > sell * (4/3)
-    checkCursor.execute("""
-                           INSERT INTO tmp_result(station_id, item_id)
-                             SELECT vPrice.station_id, vPrice.item_id
+    for (stationID, itemID, sell, buy) in checkCursor.execute("""
+                             SELECT vPrice.station_id, vPrice.item_id,
+                                    vPrice.sell_to, vPrice.buy_from
                                FROM vPrice
                               WHERE vPrice.buy_from > round(vPrice.sell_to*4.0/3)
                                 AND vPrice.sell_to > {}
-                        """.format("-1" if cmdenv.detail > 1 else "0"))
+                        """.format("-1" if cmdenv.detail > 1 else "0")):
+        cmdenv.DEBUG0("buy > sell * (4/3): {:>7n} > {:>7n}".format(buy, int(sell*4/3)))
+        tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # sql statement for rounded min/max check
     stmtAvgDev = """
@@ -149,20 +157,20 @@ def run(results, cmdenv, tdb):
             if oldItemID != itemID:
                 if len(badStmt) > 0:
                     badSQL = buildPriceSQL(badStmt)
-                    cmdenv.DEBUG0(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
+                    cmdenv.DEBUG1(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
                     checkCursor.execute(stmtPrice.format(table=tableName,
                                                          badStmt=badSQL),
                                         [ oldItemID ])
                     del badStmt[:]
                 oldItemID = itemID
             if countPrice > checkCount:
-                cmdenv.DEBUG0(", ".join(str(x) for x in (itemID, dummy, minPrice, maxPrice, countPrice))+" (good)")
+                cmdenv.DEBUG1(", ".join(str(x) for x in (itemID, dummy, minPrice, maxPrice, countPrice))+" (good)")
             else:
                 cmdenv.DEBUG0(", ".join(str(x) for x in (itemID, dummy, minPrice, maxPrice, countPrice))+" (bad)")
                 badStmt.append(buildPriceStmt(minPrice, maxPrice))
         if len(badStmt) > 0:
             badSQL = buildPriceSQL(badStmt)
-            cmdenv.DEBUG0(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
+            cmdenv.DEBUG1(" ".join(stmtPrice.format(table=tableName,badStmt=badSQL).split()))
             checkCursor.execute(stmtPrice.format(table=tableName,
                                                  badStmt=badSQL),
                                 [ itemID ])
