@@ -1,7 +1,7 @@
 unq:name,capacity,mass,drive_rating,max_ly_empty,max_ly_full,max_speed,boost_speed
 'Adder',6,35,0.0,0.0,0.0,220,320
 'Anaconda',228,2600,52345.0,19.7,17.6,180,235
-'Asp Explorer',38,0,0.0,0.0,0.0,250,340
+'Asp Explorer',38,280,0.0,0.0,0.0,250,340
 'Cobra',18,180,0.0,0.0,0.0,280,400
 'Dropship',56,580,0.0,0.0,0.0,180,300
 'Eagle',6,52,348.0,6.59,6.0,240,350
@@ -10,5 +10,5 @@ unq:name,capacity,mass,drive_rating,max_ly_empty,max_ly_full,max_speed,boost_spe
 'Lakon Type 7',104,420,0.0,0.0,0.0,180,300
 'Lakon Type 9',440,1275,23720.0,18.22,13.34,130,200
 'Orca',72,580,0.0,0.0,0.0,300,380
-'Sidewinder',4,47,348.0,8.13,7.25,220,293
+'Sidewinder',4,25,0.0,0.0,0.0,220,320
 'Viper',8,40,348.0,13.49,9.16,320,500
