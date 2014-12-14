@@ -1,4 +1,13 @@
 !name@System.system_id,name@Station.station_id,name@Attributes.attrib_id,name@AttribValues.value_id
+'Calor','Cleave Refinery','Allegiance','Independent'
+'Calor','Cleave Refinery','Economy','Industrial'
+'Calor','Cleave Refinery','Economy','Refinery'
+'Calor','Cleave Refinery','Facility','Black Market'
+'Calor','Cleave Refinery','Facility','Re-Arm'
+'Calor','Cleave Refinery','Facility','Refuel'
+'Calor','Cleave Refinery','Facility','Repair'
+'Calor','Cleave Refinery','Government','Anarchy'
+'Calor','Cleave Refinery','Type','Industrial Outpost'
 'Calor','Julian Hub','Allegiance','Federation'
 'Calor','Julian Hub','Economy','Industrial'
 'Calor','Julian Hub','Economy','Refinery'

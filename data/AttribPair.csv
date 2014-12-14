@@ -46,6 +46,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 2,'Facility','Refuel'
 2,'Facility','Repair'
 2,'Facility','Shipyard'
+2,'Government','Anarchy'
 2,'Government','Confederacy'
 2,'Government','Corporate'
 2,'Government','Democracy'
