@@ -1,4 +1,13 @@
 name@System.system_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+'Calor','Allegiance','Federation',''
+'Calor','Economy','Industrial',''
+'Calor','Economy','Refinery',''
+'Calor','Government','Democracy',''
+'Calor','Population','manual String','12.9 million'
+'Calor','Security','High',''
+'Calor','Star type','L7 V',''
+'Calor','Star type','L8 V',''
+'Calor','Star type','M6 VA',''
 'Ekonir','Allegiance','Federation',''
 'Ekonir','Economy','Extraction',''
 'Ekonir','Economy','Refinery',''
