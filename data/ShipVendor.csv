@@ -1,4 +1,10 @@
 unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cost
+'Calor','Julian Hub','Adder',87808
+'Calor','Julian Hub','Hauler',52720
+'Calor','Julian Hub','Lakon Type 6',1045945
+'Calor','Julian Hub','Lakon Type 9',76555842
+'Calor','Julian Hub','Sidewinder',32000
+'Calor','Julian Hub','Viper',142931
 'Eravate','Ackerman Market','Eagle',44800
 'Eravate','Ackerman Market','Hauler',52720
 'Eravate','Ackerman Market','Lakon Type 6',1045945

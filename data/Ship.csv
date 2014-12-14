@@ -6,7 +6,7 @@ unq:name,capacity,mass,drive_rating,max_ly_empty,max_ly_full,max_speed,boost_spe
 'Cobra',18,180,0.0,10.46,0.0,280,400
 'Dropship',56,580,0.0,8.21,0.0,180,300
 'Eagle',6,50,0.0,8.47,0.0,240,350
-'Hauler',12,14,0.0,10.46,0.0,200,300
+'Hauler',8,14,0.0,10.46,0.0,200,300
 'Lakon Type 6',50,155,0.0,12.39,0.0,220,350
 'Lakon Type 7',104,420,0.0,0.0,0.0,180,300
 'Lakon Type 9',220,1000,0.0,17.72,0.0,130,200
