@@ -56,6 +56,23 @@ CREATE TABLE AttribValues
  );
 
 
+CREATE TABLE AttribPair
+ (
+   table_id INTEGER NOT NULL,
+   attrib_id INTEGER NOT NULL,
+   value_id INTEGER NOT NULL,
+
+   UNIQUE(table_id, attrib_id, value_id),
+
+   FOREIGN KEY (attrib_id) REFERENCES Attributes(attrib_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE,
+   FOREIGN KEY (value_id) REFERENCES AttribValues(value_id)
+     ON UPDATE CASCADE
+     ON DELETE CASCADE
+ );
+
+
 CREATE TABLE System
  (
    system_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +96,7 @@ CREATE TABLE SystemAttributes
  (
    system_id INTEGER NOT NULL,
    attrib_id INTEGER NOT NULL,
-   value_id INTEGER,
+   value_id INTEGER NOT NULL,
    value TEXT COLLATE nocase,
 
    FOREIGN KEY (system_id) REFERENCES System(system_id)

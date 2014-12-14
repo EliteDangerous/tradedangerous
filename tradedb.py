@@ -286,6 +286,7 @@ class TradeDB(object):
                       [ 'Added.csv', 'Added' ],
                       [ 'Attributes.csv', 'Attributes' ],
                       [ 'AttribValues.csv', 'AttribValues' ],
+                      [ 'AttribPair.csv', 'AttribPair' ],
                       [ 'System.csv', 'System' ],
                       [ 'SystemAttributes.csv', 'SystemAttributes' ],
                       [ 'Station.csv', 'Station' ],
