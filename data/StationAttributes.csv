@@ -1,4 +1,13 @@
 !name@System.system_id,name@Station.station_id,name@Attributes.attrib_id,name@AttribValues.value_id
+'Calor','Papin Terminal','Allegiance','Independent'
+'Calor','Papin Terminal','Economy','Industrial'
+'Calor','Papin Terminal','Economy','Refinery'
+'Calor','Papin Terminal','Facility','Commodities'
+'Calor','Papin Terminal','Facility','Re-Arm'
+'Calor','Papin Terminal','Facility','Refuel'
+'Calor','Papin Terminal','Facility','Repair'
+'Calor','Papin Terminal','Government','Dictatorship'
+'Calor','Papin Terminal','Type','Industrial Outpost'
 'Ekonir','Kubasov Orbital','Allegiance','Independent'
 'Ekonir','Kubasov Orbital','Economy','Extraction'
 'Ekonir','Kubasov Orbital','Economy','Refinery'
