@@ -55,6 +55,12 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'Obambivas','Kennan Orbital','Cobra',379718
 'Obambivas','Kennan Orbital','Lakon Type 6',1045945
 'Obambivas','Kennan Orbital','Lakon Type 7',17472252
+'Tauerni','Rushworth Port','Adder',87808
+'Tauerni','Rushworth Port','Eagle',44800
+'Tauerni','Rushworth Port','Hauler',52720
+'Tauerni','Rushworth Port','Lakon Type 9',76555842
+'Tauerni','Rushworth Port','Sidewinder',32000
+'Tauerni','Rushworth Port','Viper',142931
 'Yakabugai','Serebrov Station','Anaconda',146969451
 'Yakabugai','Serebrov Station','Asp Explorer',6661153
 'Yakabugai','Serebrov Station','Dropship',37814205
