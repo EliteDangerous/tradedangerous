@@ -5,6 +5,12 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'Calor','Julian Hub','Lakon Type 9',76555842
 'Calor','Julian Hub','Sidewinder',32000
 'Calor','Julian Hub','Viper',142931
+'Dimoco','Edison Orbital','Cobra',379718
+'Dimoco','Edison Orbital','Lakon Type 6',1045945
+'Dimoco','Edison Orbital','Lakon Type 9',76555842
+'Dimoco','Meitner Ring','Eagle',44800
+'Dimoco','Meitner Ring','Orca',48539887
+'Dimoco','Meitner Ring','Sidewinder',32000
 'Eravate','Ackerman Market','Eagle',44800
 'Eravate','Ackerman Market','Hauler',52720
 'Eravate','Ackerman Market','Lakon Type 6',1045945
