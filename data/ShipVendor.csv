@@ -1,4 +1,10 @@
 unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cost
+'Aptet','Torricelli Port','Dropship',37814205
+'Aptet','Torricelli Port','Hauler',52720
+'Aptet','Torricelli Port','Lakon Type 6',1045945
+'Aptet','Torricelli Port','Lakon Type 7',17472252
+'Aptet','Torricelli Port','Lakon Type 9',76555842
+'Aptet','Torricelli Port','Sidewinder',32000
 'Calor','Julian Hub','Adder',87808
 'Calor','Julian Hub','Hauler',52720
 'Calor','Julian Hub','Lakon Type 6',1045945
