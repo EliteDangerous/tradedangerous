@@ -1,4 +1,11 @@
 name@System.system_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+'Aptet','Allegiance','Federation',''
+'Aptet','Economy','Industrial',''
+'Aptet','Government','Corporate',''
+'Aptet','Population','manual String','2.6 million'
+'Aptet','Security','Low',''
+'Aptet','Star type','M2 VA',''
+'Aptet','Star type','M7 VA',''
 'Calor','Allegiance','Federation',''
 'Calor','Economy','Industrial',''
 'Calor','Economy','Refinery',''
