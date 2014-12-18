@@ -43,6 +43,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 2,'Allegiance','Independent'
 2,'Economy','Agriculture'
 2,'Economy','Extraction'
+2,'Economy','High Tech'
 2,'Economy','Industrial'
 2,'Economy','Refinery'
 2,'Economy','Tourism'
