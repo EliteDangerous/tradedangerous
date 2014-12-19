@@ -66,4 +66,5 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 2,'Type','Industrial Outpost'
 2,'Type','Ocellus Starport'
 2,'Type','Orbis Starport'
+2,'Type','Scientific Outpost'
 2,'Type','Unsanctioned Outpost'
