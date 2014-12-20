@@ -18,6 +18,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Security','High'
 1,'Security','Low'
 1,'Security','Medium'
+1,'Star type','G3 VAB'
 1,'Star type','G6 V'
 1,'Star type','G7 VA'
 1,'Star type','G8 VAB'
