@@ -12,6 +12,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Government','Confederacy'
 1,'Government','Corporate'
 1,'Government','Democracy'
+1,'Government','Patronage'
 1,'Population','manual Number'
 1,'Population','manual String'
 1,'Security','High'
