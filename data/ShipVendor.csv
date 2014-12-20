@@ -49,6 +49,12 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'LFT 1448','Dirac Enterprise','Lakon Type 6',1045945
 'LFT 1448','Dirac Enterprise','Lakon Type 9',76555842
 'LFT 1448','Dirac Enterprise','Sidewinder',32000
+'Lhangkambe','Yeliseyev Terminal','Adder',87808
+'Lhangkambe','Yeliseyev Terminal','Cobra',379718
+'Lhangkambe','Yeliseyev Terminal','Eagle',44800
+'Lhangkambe','Yeliseyev Terminal','Hauler',52720
+'Lhangkambe','Yeliseyev Terminal','Sidewinder',32000
+'Lhangkambe','Yeliseyev Terminal','Viper',142931
 'LHS 3447','Dalton Gateway','Asp Explorer',6661153
 'LHS 3447','Dalton Gateway','Hauler',52720
 'LHS 3447','Dalton Gateway','Lakon Type 9',76555842
