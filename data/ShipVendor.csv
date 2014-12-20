@@ -49,6 +49,14 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'LFT 1448','Dirac Enterprise','Lakon Type 6',1045945
 'LFT 1448','Dirac Enterprise','Lakon Type 9',76555842
 'LFT 1448','Dirac Enterprise','Sidewinder',32000
+'Lhangkambe','Jacquard Dock','Adder',87808
+'Lhangkambe','Jacquard Dock','Dropship',37814205
+'Lhangkambe','Jacquard Dock','Eagle',44800
+'Lhangkambe','Jacquard Dock','Hauler',52720
+'Lhangkambe','Jacquard Dock','Lakon Type 7',17472252
+'Lhangkambe','Jacquard Dock','Lakon Type 9',76555842
+'Lhangkambe','Jacquard Dock','Sidewinder',32000
+'Lhangkambe','Jacquard Dock','Viper',142931
 'Lhangkambe','Yeliseyev Terminal','Adder',87808
 'Lhangkambe','Yeliseyev Terminal','Cobra',379718
 'Lhangkambe','Yeliseyev Terminal','Eagle',44800
