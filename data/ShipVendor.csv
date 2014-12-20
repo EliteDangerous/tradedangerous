@@ -49,6 +49,14 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,cos
 'LFT 1448','Dirac Enterprise','Lakon Type 6',1045945
 'LFT 1448','Dirac Enterprise','Lakon Type 9',76555842
 'LFT 1448','Dirac Enterprise','Sidewinder',32000
+'Lhangkambe','Detmer Orbital','Adder',87808
+'Lhangkambe','Detmer Orbital','Dropship',37814205
+'Lhangkambe','Detmer Orbital','Eagle',44800
+'Lhangkambe','Detmer Orbital','Hauler',52720
+'Lhangkambe','Detmer Orbital','Lakon Type 7',17472252
+'Lhangkambe','Detmer Orbital','Lakon Type 9',76555842
+'Lhangkambe','Detmer Orbital','Sidewinder',32000
+'Lhangkambe','Detmer Orbital','Viper',142931
 'Lhangkambe','Jacquard Dock','Adder',87808
 'Lhangkambe','Jacquard Dock','Dropship',37814205
 'Lhangkambe','Jacquard Dock','Eagle',44800
