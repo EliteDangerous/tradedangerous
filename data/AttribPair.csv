@@ -8,6 +8,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Economy','Refinery'
 1,'Economy','Tourism'
 1,'Gliese','manual String'
+1,'Government','Communism'
 1,'Government','Confederacy'
 1,'Government','Corporate'
 1,'Government','Democracy'
