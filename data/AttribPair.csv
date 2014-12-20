@@ -63,6 +63,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 2,'Government','Democracy'
 2,'Government','Dictatorship'
 2,'Government','Feudal'
+2,'Government','Patronage'
 2,'Type','Civilian Outpost'
 2,'Type','Commercial Outpost'
 2,'Type','Coriolis Starport'
