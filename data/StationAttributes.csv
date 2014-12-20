@@ -1,4 +1,12 @@
 !name@System.system_id,name@Station.station_id,name@Attributes.attrib_id,name@AttribValues.value_id
+'Aequeelg','Robinson Station','Allegiance','Federation'
+'Aequeelg','Robinson Station','Economy','Extraction'
+'Aequeelg','Robinson Station','Economy','Refinery'
+'Aequeelg','Robinson Station','Facility','Commodities'
+'Aequeelg','Robinson Station','Facility','Refuel'
+'Aequeelg','Robinson Station','Facility','Repair'
+'Aequeelg','Robinson Station','Government','Democracy'
+'Aequeelg','Robinson Station','Type','Industrial Outpost'
 'Aptet','Torricelli Port','Allegiance','Federation'
 'Aptet','Torricelli Port','Economy','Industrial'
 'Aptet','Torricelli Port','Facility','Commodities'
