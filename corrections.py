@@ -31,6 +31,15 @@ stations = {
     "TRELLA/TITTO COLONY": "Tito Colony",
     "ORERVE/WATSON SATION": "Watson Station",
     "MCC 467/ROB HUBBARD RING": "Ron Hubbard Ring",
+    "GCRV 4654/HERZEFELD LANDING": DELETED,
+    "LHS 220/CULPEPERCOLONY": DELETED,
+    "LHS 64/WIBERG HANGAR": DELETED,    # "Hanger",
+    "LP 862-184/MAYR HANGAR": "Mayr Hanger",
+    "TYR/GLASHOW": DELETED,
+    "EGOVAE/ENOATE MARKET": "Endate Market",
+    "WOLF 1301/SAUNDER'S DIVE": "Saunders's Dive",
+    "VEQUESS/AGNEWS FOLLY": "Agnews' Folly",
+    "ONGKAMPAN/PATTERSON STATION:274": DELETED,
 
 #ADD_STATIONS_HERE
 }

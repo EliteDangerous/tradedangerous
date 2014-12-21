@@ -117,6 +117,7 @@ CREATE TABLE Station
    name VARCHAR(40) COLLATE nocase,
    system_id INTEGER NOT NULL,
    ls_from_star INTEGER NOT NULL,
+   blackmarket TEXT(1) NOT NULL DEFAULT '?' CHECK (blackmarket IN ('?', 'Y', 'N')),
 
    UNIQUE (system_id, name),
 
@@ -150,13 +151,7 @@ CREATE TABLE Ship
  (
    ship_id INTEGER PRIMARY KEY AUTOINCREMENT,
    name VARCHAR(40) COLLATE nocase,
-   capacity INTEGER NOT NULL,
-   mass INTEGER NOT NULL,
-   drive_rating DOUBLE NOT NULL,
-   max_ly_empty DOUBLE NOT NULL,
-   max_ly_full DOUBLE NOT NULL,
-   max_speed INTEGER NOT NULL,
-   boost_speed INTEGER NOT NULL,
+   cost INTEGER NOT NULL,
 
    UNIQUE (name)
  );
@@ -166,7 +161,6 @@ CREATE TABLE ShipVendor
  (
    ship_id INTEGER NOT NULL,
    station_id INTEGER NOT NULL,
-   cost INTEGER,
 
    PRIMARY KEY (ship_id, station_id),
 
