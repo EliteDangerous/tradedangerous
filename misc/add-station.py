@@ -5,11 +5,11 @@ import re
 
 
 argStr = ' '.join(sys.argv[1:])
-m = re.match(r'^(.*)/(.*)(?:\:([\d]+))', argStr)
+m = re.match(r'^(.*)/(.*?)(\:([\d]+))?', argStr)
 sys, stn, dist = m.group(1, 2, 3)
 sys = sys.title()
 stn = stn.title()
-dist = int(dist)
+dist = int(dist or 0)
 
 import sqlite3
 conn = sqlite3.connect("data/TradeDangerous.db")
