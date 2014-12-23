@@ -47,6 +47,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Star type','M7 VA'
 1,'Star type','M8 VA'
 1,'Star type','M9 VI'
+1,'Star type','T3 V'
 1,'Star type','T6 V'
 1,'Star type','Y4 V'
 1,'Star type','Y5 V'
