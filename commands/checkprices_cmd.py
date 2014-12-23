@@ -111,15 +111,15 @@ def run(results, cmdenv, tdb):
         cmdenv.DEBUG0("sell = buy = stock: {:>7n} = {:>7n}".format(sell, buy))
         tempCursor.execute(stmtInsert, [stationID, itemID])
 
-    # check if buy > sell * (4/3)
+    # check if buy > sell * (10/7)
     for (stationID, itemID, sell, buy) in checkCursor.execute("""
                              SELECT vPrice.station_id, vPrice.item_id,
                                     vPrice.sell_to, vPrice.buy_from
                                FROM vPrice
-                              WHERE vPrice.buy_from > round(vPrice.sell_to*4.0/3)
+                              WHERE vPrice.buy_from > round(vPrice.sell_to*10.0/7)
                                 AND vPrice.sell_to > {}
                         """.format("-1" if cmdenv.detail > 1 else "0")):
-        cmdenv.DEBUG0("buy > sell * (4/3): {:>7n} > {:>7n}".format(buy, int(sell*4/3)))
+        cmdenv.DEBUG0("buy > sell * (10/7): {:>7n} > {:>7n}".format(buy, int(sell*4/3)))
         tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # sql statement for rounded min/max check
