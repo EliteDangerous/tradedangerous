@@ -1,4 +1,13 @@
 unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id
+'Anlave','Kobayashi City','Asp Explorer'
+'Anlave','Kobayashi City','Cobra'
+'Anlave','Kobayashi City','Eagle'
+'Anlave','Kobayashi City','Hauler'
+'Anlave','Kobayashi City','Lakon Type 6'
+'Anlave','Kobayashi City','Orca'
+'Anlave','Kobayashi City','Python'
+'Anlave','Kobayashi City','Sidewinder'
+'Anlave','Kobayashi City','Viper'
 'Aptet','Torricelli Port','Dropship'
 'Aptet','Torricelli Port','Hauler'
 'Aptet','Torricelli Port','Lakon Type 6'
