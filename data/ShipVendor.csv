@@ -1,4 +1,13 @@
 unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id
+'Anlave','Hogg City','Adder'
+'Anlave','Hogg City','Cobra'
+'Anlave','Hogg City','Dropship'
+'Anlave','Hogg City','Eagle'
+'Anlave','Hogg City','Hauler'
+'Anlave','Hogg City','Lakon Type 6'
+'Anlave','Hogg City','Python'
+'Anlave','Hogg City','Sidewinder'
+'Anlave','Hogg City','Viper'
 'Anlave','Kobayashi City','Asp Explorer'
 'Anlave','Kobayashi City','Cobra'
 'Anlave','Kobayashi City','Eagle'
