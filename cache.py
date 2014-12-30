@@ -128,7 +128,7 @@ class UnknownStationError(BuildCacheBaseException):
         Raised when the file contains an unknown star/station name.
     """
     def __init__(self, fromFile, lineNo, key):
-        error = "Unrecognized STAR/Station, '{}'.".format(key)
+        error = 'Unrecognized STAR/Station: "{}"'.format(key)
         super().__init__(fromFile, lineNo, error)
 
 class UnknownItemError(BuildCacheBaseException):
@@ -138,7 +138,7 @@ class UnknownItemError(BuildCacheBaseException):
             itemName   Key we tried to look up.
     """
     def __init__(self, fromFile, lineNo, itemName):
-        error = "Unrecognized item name, '{}'.".format(itemName)
+        error = 'Unrecognized item name: "{}"'.format(itemName)
         super().__init__(fromFile, lineNo, error)
 
 class UnknownCategoryError(BuildCacheBaseException):
@@ -148,7 +148,7 @@ class UnknownCategoryError(BuildCacheBaseException):
             categoryName   Key we tried to look up.
     """
     def __init__(self, fromFile, lineNo, categoryName):
-        error = "Unrecognized category name, '{}'.".format(categoryName)
+        error = 'Unrecognized category name: "{}"'.format(categoryName)
         super().__init__(fromFile, lineNo, error)
 
 
@@ -233,7 +233,7 @@ def parseSupply(pricesFile, lineNo, category, reading):
     if levelNo < -1:
         raise SupplyError(
                     pricesFile, lineNo, category, reading,
-                    "Unrecognized level suffix '{}', "
+                    'Unrecognized level suffix: "{}": '
                     "expected one of 'L', 'M', 'H' or '?'".format(
                         level
                 ))
@@ -249,7 +249,7 @@ def parseSupply(pricesFile, lineNo, category, reading):
 
     raise SupplyError(
                 pricesFile, lineNo, category, reading,
-                "Unrecognized units/level value: {}, "
+                'Unrecognized units/level value: "{}": '
                 "expected '-', '?', or a number followed "
                 "by a level (L, M, H or ?).".format(
                     level
@@ -576,14 +576,12 @@ def processPrices(tdenv, priceFile, db, defaultZero):
 
 ######################################################################
 
-def processPricesFile(tdenv, db, pricesPath, defaultZero=False):
+def processPricesFile(tdenv, db, pricesPath, pricesFh=None, defaultZero=False):
     tdenv.DEBUG0("Processing Prices file '{}'", pricesPath)
 
-    assert isinstance(pricesPath, Path)
-
-    with pricesPath.open('rU') as pricesFile:
+    with pricesFh or pricesPath.open('rU') as pricesFh:
         warnings, items, buys, sells = processPrices(
-                tdenv, pricesFile, db, defaultZero
+                tdenv, pricesFh, db, defaultZero
         )
  
     if items:
@@ -883,16 +881,14 @@ def regeneratePricesFile(tdb, tdenv):
 
 ######################################################################
 
-def importDataFromFile(tdb, tdenv, path, reset=False):
+def importDataFromFile(tdb, tdenv, path, pricesFh=None, reset=False):
     """
         Import price data from a file on a per-station basis,
         that is when a new station is encountered, delete any
         existing records for that station in the database.
     """
 
-    assert isinstance(path, Path)
-
-    if not path.exists():
+    if not pricesFh and not path.exists():
         raise TradeException("No such file: {}".format(
                     str(path)
                 ))
@@ -905,6 +901,7 @@ def importDataFromFile(tdb, tdenv, path, reset=False):
     processPricesFile(tdenv,
             db=tdb.getDB(),
             pricesPath=path,
+            pricesFh=pricesFh,
             )
 
     # If everything worked, we may need to re-build the prices file.
