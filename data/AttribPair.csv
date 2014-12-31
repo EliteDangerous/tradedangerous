@@ -1,4 +1,5 @@
 unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
+1,'Allegiance','Anarchy'
 1,'Allegiance','Federation'
 1,'Allegiance','Independent'
 1,'Economy','Agriculture'
@@ -7,6 +8,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Economy','Industrial'
 1,'Economy','Refinery'
 1,'Economy','Tourism'
+1,'Government','Anarchy'
 1,'Government','Communism'
 1,'Government','Confederacy'
 1,'Government','Corporate'
