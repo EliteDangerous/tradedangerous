@@ -265,6 +265,10 @@ _td_main()
 	buy)
 		_td_buy
 		;;
+	checkprices)
+		_td_common && return 0
+		COMPREPLY=( $(compgen -W "${common_opts}" -- ${cur}) )
+		;;
 	export)
 		_td_export
 		;;
@@ -293,7 +297,7 @@ _td_main()
 		_td_update
 		;;
 	*)
-		opts="buildcache buy export import local nav olddata rares run sell update"
+		opts="buildcache buy checkprices export import local nav olddata rares run sell update"
 		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 	esac
 	return 0
