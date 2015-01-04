@@ -371,7 +371,7 @@ def processPrices(tdenv, priceFile, db, defaultZero):
             facility = systemName + '/' + stationName
             try:
                 stationID = systemByName[facility]
-                tdenv.DEBUG1("Renamed: {}/{} -> {}", 
+                tdenv.DEBUG1("Renamed: {}/{} -> {}",
                         systemNameIn, stationNameIn,
                         facility
                 )
@@ -498,7 +498,7 @@ def processPrices(tdenv, priceFile, db, defaultZero):
         processedItems[itemID] = lineNo
 
         items.append([ stationID, itemID, modified ])
-        if sellTo > 0 and demandUnits != 0 and demandLevel != 0:
+        if sellTo > 0:
             buys.append([
                         stationID, itemID,
                         sellTo, demandUnits, demandLevel,
@@ -589,7 +589,7 @@ def processPricesFile(tdenv, db, pricesPath, pricesFh=None, defaultZero=False):
         warnings, items, buys, sells, numSys, numStn = processPrices(
                 tdenv, pricesFh, db, defaultZero
         )
- 
+
     if items:
         db.executemany("""
                     INSERT INTO StationItem
