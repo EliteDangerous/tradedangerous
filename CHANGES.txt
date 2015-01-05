@@ -2,7 +2,11 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
-Work In Progress:
+v6.4.1 Jan 04 2015
+. (kfsone) Added the "station" sub-command for querying, adding, updating or
+        removing stations from the .db and .csv files. See
+           trade.py station --help
+        or the README.txt for more information.
 . (kfsone) Import reports stats on completion (so its more obvious it worked)
 . (kfsone) "NOTE" now indicates a line that can be hidden using "-q",
 . (kfsone) Deleted/Deprecated keys in .csv files are now warnings with "-i",
@@ -13,6 +17,7 @@ Work In Progress:
 . (kfsone) Added "--reverse" to "rares" command, to make it easier to find
         far away alternatives:
         $ trade.py rare --near neto --ly 160 --reverse --limit 10
++ Data: kfsone, path o'gen, gazelle, maddavo,
 
 v6.4.0 Jan 01 2015
 . (kfsone) Added "rare" sub-command,
