@@ -37,6 +37,11 @@ switches = [
             default=None,
             type=int,
     ),
+    ParseArgument('--pad-size', '-p',
+            help='Limit the padsize to this ship size (S,M,L or ? for unkown).',
+            metavar='PADSIZES',
+            dest='padSize',
+    ),
     MutuallyExclusiveGroup(
         ParseArgument('--price-sort', '-P',
                 help='(When using --near) Sort by price not distance',
@@ -58,31 +63,49 @@ switches = [
 
 def run(results, cmdenv, tdb):
     from commands.commandenv import ResultRow
-
-    item = tdb.lookupItem(cmdenv.item)
-    cmdenv.DEBUG0("Looking up item {} (#{})", item.name(), item.ID)
+    try:
+        item = tdb.lookupItem(cmdenv.item)
+        cmdenv.DEBUG0("Looking up item {} (#{})", item.name(), item.ID)
+    except LookupError:
+        item = tdb.lookupShip(cmdenv.item)
+        cmdenv.DEBUG0("Looking up ship {} (#{})", item.name(), item.ID)
+        cmdenv.ship = True
 
     results.summary = ResultRow()
     results.summary.item = item
 
     if cmdenv.detail:
-        avgPrice = tdb.query("""
-                SELECT CAST(AVG(ss.price) AS INT)
-                  FROM StationSelling AS ss
-                 WHERE ss.item_id = ?
-        """, [item.ID]).fetchone()[0]
-        results.summary.avg = avgPrice
+        if cmdenv.ship:
+            results.summary.avg = item.cost
+        else:
+            avgPrice = tdb.query("""
+                    SELECT CAST(AVG(ss.price) AS INT)
+                      FROM StationSelling AS ss
+                     WHERE ss.item_id = ?
+            """, [item.ID]).fetchone()[0]
+            results.summary.avg = avgPrice
 
     # Constraints
-    tables = "StationSelling AS ss"
-    constraints = [ "(item_id = {})".format(item.ID) ]
-    columns = [
+    if cmdenv.ship:
+        tables = "ShipVendor AS ss"
+        constraints = [ "(ship_id = {})".format(item.ID) ]
+        columns = [
+            'ss.station_id',
+            '0',
+            '1',
+            "0",
+            ]
+        bindValues = [ ]
+    else:
+        tables = "StationSelling AS ss"
+        constraints = [ "(item_id = {})".format(item.ID) ]
+        columns = [
             'ss.station_id',
             'ss.price',
             'ss.units',
             "JULIANDAY('NOW') - JULIANDAY(ss.modified)",
-    ]
-    bindValues = [ ]
+            ]
+        bindValues = [ ]
 
     if cmdenv.quantity:
         constraints.append("(units = -1 or units >= ?)")
@@ -103,14 +126,21 @@ def run(results, cmdenv, tdb):
                     includeSelf=True,
             )
         }
-        tables += (
-                " INNER JOIN Station AS stn"
-                " ON (stn.station_id = ss.station_id)"
-        )
-        constraints.append("(stn.system_id IN ({}))".format(
-            ",".join(['?'] * len(systemRanges))
-        ))
-        bindValues += list(system.ID for system in systemRanges.keys())
+        # We need to ensure we use less than 999 bind values in total.
+        # If we don't filter in the query, we'll filter by stations in
+        # systemRanges when building our result rows
+        if len(systemRanges) > 999-len(bindValues):
+            cmdenv.DEBUG0("Too many matching systems ({}) for SQL filter. "
+                          "Hard way it is.".format(len(systemRanges)))
+        else:
+            tables += (
+                    " INNER JOIN Station AS stn"
+                    " ON (stn.station_id = ss.station_id)"
+            )
+            constraints.append("(stn.system_id IN ({}))".format(
+                ",".join(['?'] * len(systemRanges))
+            ))
+            bindValues += list(system.ID for system in systemRanges.keys())
 
     whereClause = ' AND '.join(constraints)
     stmt = """
@@ -125,13 +155,20 @@ def run(results, cmdenv, tdb):
     cmdenv.DEBUG0('SQL: {}', stmt)
     cur = tdb.query(stmt, bindValues)
 
+    padSize = cmdenv.padSize
+
     stationByID = tdb.stationByID
     for (stationID, priceCr, stock, age) in cur:
+        station = stationByID[stationID]
+        if padSize and not station.checkPadSize(padSize):
+            continue
         row = ResultRow()
-        row.station = stationByID[stationID]
-        cmdenv.DEBUG2("{} {}cr {} units", row.station.name(), priceCr, stock)
+        row.station = station
         if nearSystem:
-           row.dist = systemRanges[row.station.system]
+            # check the system was in our range query
+            if row.station.system not in systemRanges:
+                continue
+            row.dist = systemRanges[row.station.system]
         row.price = priceCr
         row.stock = stock
         row.age = age
@@ -170,19 +207,23 @@ def render(results, cmdenv, tdb):
     stnRowFmt = RowFormat()
     stnRowFmt.addColumn('Station', '<', longestNameLen,
             key=lambda row: row.station.name())
-    stnRowFmt.addColumn('Cost', '>', 10, 'n',
-            key=lambda row: row.price)
-    stnRowFmt.addColumn('Stock', '>', 10,
-            key=lambda row: '{:n}'.format(row.stock) if row.stock >= 0 else '?')
+    if not cmdenv.ship:
+        stnRowFmt.addColumn('Cost', '>', 10, 'n',
+                key=lambda row: row.price)
+        stnRowFmt.addColumn('Stock', '>', 10,
+                key=lambda row: '{:n}'.format(row.stock) if row.stock >= 0 else '?')
 
     if cmdenv.nearSystem:
         stnRowFmt.addColumn('DistLy', '>', 6, '.2f',
                 key=lambda row: row.dist)
 
-    stnRowFmt.addColumn('Age/days', '>', 7, '.2f',
-            key=lambda row: row.age)
+    if not cmdenv.ship:
+        stnRowFmt.addColumn('Age/days', '>', 7, '.2f',
+                key=lambda row: row.age)
     stnRowFmt.addColumn("StnLs", '>', 10,
             key=lambda row: row.station.distFromStar())
+    stnRowFmt.addColumn('B/mkt', '>', 4,
+            key=lambda row: TradeDB.marketStates[row.station.blackMarket])
     stnRowFmt.addColumn("Pad", '>', '3',
             key=lambda row: TradeDB.padSizes[row.station.maxPadSize])
 
@@ -195,7 +236,7 @@ def render(results, cmdenv, tdb):
 
     if cmdenv.detail:
         print("{:{lnl}} {:>10n}".format(
-                "-- Average",
+                "-- Average" if not cmdenv.ship else "-- Ship Cost",
                 results.summary.avg,
                 lnl=longestNameLen,
         ))

@@ -171,7 +171,7 @@ For additional help on a specific command, such as 'update' use
     Reads prices from a file and loads them into the cache
 
   trade.py buy ...
-    Finds places to buy a given item
+    Finds places to buy a given item/ship
 
   trade.py sell ...
     Finds places to sell a given item
@@ -221,9 +221,15 @@ RUN sub-command:
 
      --start-jumps N
      -s N
-       Considers stations from stations upto this many jumps from your
+       Considers stations from systems upto this many jumps from your
        specified start location.
          --from beagle2 --ly-per 7.56 --empty 10.56 -s 2
+
+     --end-jumps N
+     -e N
+       Considers stations from systems upto this many jumps from your
+       specified destination (--to).
+         --to lave -e 3      (find runs that end within 3 jumps of lave)
 
      --via <station or system>
        Lets you specify a station that must be between the second and final hop.
@@ -238,6 +244,20 @@ RUN sub-command:
        e.g.
          --max-days-old 7     (data less than a week old)
          -MD=2                (data less than 2 days old)
+
+     --pad-size SML?
+     --pad SML?
+     -p
+       Limit results to stations that match one of the pad sizes
+       specified.
+         --pad ML?            (med, lrg or unknown only)
+         -o ML?                 ""    ""      ""    ""
+         --pad ?              (unknown only),
+         --pad L              (large only, ignores unknown)
+
+     --black-market
+     -bm
+       Only consider stations that have a black market.
 
      --ls-penalty N.NN
      --lsp N.NN
@@ -480,6 +500,16 @@ RARES sub-command:
        e.g.
          --limit 10
 
+    --pad-size SML?
+    --pad SML?
+    -p
+      Limit results to stations that match one of the pad sizes
+      specified.
+        --pad ML?            (med, lrg or unknown only)
+        -o ML?                 ""    ""      ""    ""
+        --pad ?              (unknown only),
+        --pad L              (large only, ignores unknown)
+
      --price-sort
      -P
        Sort by price rather than proximity
@@ -584,6 +614,16 @@ LOCAL sub-command:
       Constrains local systems to a maximum ly distance
       --ly 20.0
 
+    --pad-size SML?
+    --pad SML?
+    -p
+      Limit results to stations that match one of the pad sizes
+      specified.
+        --pad ML?            (med, lrg or unknown only)
+        -o ML?                 ""    ""      ""    ""
+        --pad ?              (unknown only),
+        --pad L              (large only, ignores unknown)
+
     -v
       Show stations + their distance from star
 
@@ -627,8 +667,9 @@ LOCAL sub-command:
 
 BUY sub-command:
 
-  Looks for stations selling the specified item: that means they have a non-zero
-  asking price and a stock level other than "n/a".
+  Looks for stations selling the specified item or ship.
+  
+  For items, that means they have a non-zero asking price and a stock level other than "n/a".
 
   trade.py buy [-q | -v] [--quantity Q] [--near N] [--ly-per N] item [-P | -S] [--limit]
 
@@ -648,6 +689,16 @@ BUY sub-command:
     --ly-per N.N
       Sets the range of --near (requires --near)
       --near chango --ly 10
+
+    --pad-size SML?
+    --pad SML?
+    -p
+      Limit results to stations that match one of the pad sizes
+      specified.
+        --pad ML?            (med, lrg or unknown only)
+        -p ML?                 ""    ""      ""    ""
+        --pad ?              (unknown only),
+        --pad L              (large only, ignores unknown)
 
     --prices-sort
     -P
@@ -681,6 +732,16 @@ SELL sub-command:
     --ly-per N.N
       Sets the range of --near (requires --near)
       --near chango --ly 10
+
+    --pad-size SML?
+    --pad SML?
+    -p
+      Limit results to stations that match one of the pad sizes
+      specified.
+        --pad ML?            (med, lrg or unknown only)
+        -o ML?                 ""    ""      ""    ""
+        --pad ?              (unknown only),
+        --pad L              (large only, ignores unknown)
 
     --prices-sort
     -P
