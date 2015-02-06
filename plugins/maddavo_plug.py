@@ -1,5 +1,7 @@
 import cache
+import os
 import pathlib
+import platform
 import plugins
 import re
 import time
@@ -8,6 +10,20 @@ import tradeenv
 import transfers
 
 from plugins import PluginException
+
+
+hasTkInter = False
+if not 'NOTK' in os.environ and platform.system() != 'Darwin':  # focus bug
+    try:
+        import tkinter
+        import tkinter.messagebox as mbox
+        hasTkInter = True
+    except ImportError:
+        pass
+
+
+class DecodingError(PluginException):
+    pass
 
 
 class ImportPlugin(plugins.ImportPluginBase):
@@ -25,9 +41,8 @@ class ImportPlugin(plugins.ImportPluginBase):
         'stncsv':       "Also download Station.csv from the site.",
         'skipdl':       "Skip doing any downloads.",
         'force':        "Process prices even if timestamps suggest "
-                        "there is no new data."
+                        "there is no new data.",
     }
-
 
     def __init__(self, tdb, tdenv):
         super().__init__(tdb, tdenv)
@@ -95,6 +110,60 @@ class ImportPlugin(plugins.ImportPluginBase):
                     self.prevImportDate
                 ))
 
+    def splash(self, title, text):
+        if hasTkInter:
+            tk = tkinter.Tk()
+            tk.withdraw()
+            mbox.showinfo(title, text)
+        else:
+            print("=== {} ===\n".format(title))
+            print(text)
+            input("Press return to continue: ")
+
+
+    def checkForFirstTimeUse(self):
+        iniFilePath = self.tdb.dataPath / "maddavo.ini"
+        if not iniFilePath.is_file():
+            with iniFilePath.open("w") as fh:
+                print(
+                    "[default]\n"
+                    "firstUse={}".format(time.time()),
+                    file=fh
+                )
+            self.splash(
+                    "Maddavo Plugin",
+                    "This plugin fetches price data from Maddavo's site, "
+                    "a 3rd party crowd-source data project.\n"
+                    "\n"
+                    "  http://davek.com.au/td/\n"
+                    "\n"
+                    "To use this provider you may need to download some "
+                    "additional files such as the Station.csv or System.csv "
+                    "files from this provider's site.\n"
+                    "\n"
+                    "When importing prices from this provider, TD will "
+                    "automatically add temporary, 'placeholder' entries for "
+                    "stations in the .prices file that are not in your local "
+                    "'Station.csv' file.\n"
+                    "\n"
+                    "You can silence these warnings with '-q', or you can "
+                    "refresh your Station.csv file by adding the "
+                    "'--opt=stncsv' flag periodically, or you can export the "
+                    "placeholders to your .csv file with the command:\n"
+                    "  trade.py export --table Station.csv\n"
+                    "or for short:\n"
+                    "  trade.py exp --tab Station.csv\n"
+                    "\n"
+                    "PLEASE BE AWARE: Using a 3rd party source for your .csv "
+                    "files may cause conflicts when updating the "
+                    "TradeDangerous code.\n"
+                    "\n"
+                    "See the group (http://kfs.org/td/group), thread "
+                    "(http://kfs.org/td/thread) or wiki "
+                    "(http://kfs.org/td/wiki) for more help."
+                )
+
+
 
     def run(self):
         tdb, tdenv = self.tdb, self.tdenv
@@ -103,6 +172,8 @@ class ImportPlugin(plugins.ImportPluginBase):
         # to record the start time before we download. What we
         # care about is when we downloaded relative to when the
         # files were previously generated.
+
+        self.checkForFirstTimeUse()
 
         startTime = time.time()
 
@@ -131,7 +202,9 @@ class ImportPlugin(plugins.ImportPluginBase):
                 )
                 cacheNeedsRebuild = True
             # Download 
-            if lastRunDays < 1.9:
+            if lastRunDays < 3/24:
+                priceFile = "prices-3h.asp"
+            elif lastRunDays < 1.9:
                 priceFile = "prices-2d.asp"
             else:
                 if lastRunDays < 99:
@@ -179,15 +252,37 @@ class ImportPlugin(plugins.ImportPluginBase):
         lastStn = None
         updatedStations = set()
         tdenv.DEBUG0("Reading prices data")
-        with open("import.prices", "rU", encoding="utf-8") as fh:
+        with open(self.filename, "rUb") as fh:
             # skip the shebang.
-            firstLine = fh.readline()
+            firstLine = fh.readline().decode(encoding="utf-8")
             self.checkShebang(firstLine, False)
             importDate = self.importDate
 
-            for line in fh:
+            lineNo = 0
+            while True:
+                lineNo += 1
+                try:
+                    line = next(fh)
+                except StopIteration:
+                    break
+                try:
+                    line = line.decode(encoding="utf-8")
+                except UnicodeDecodeError as e:
+                    try:
+                        line = line.decode(encoding="latin1").encode("utf-8").decode()
+                    except UnicodeDecodeError:
+                        raise DecodingError(
+                            "{} line {}: "
+                            "Invalid (unrecognized, non-utf8) character sequence: {}\n{}".format(
+                                self.filename, lineNo, str(e), line,
+                        )) from None
+                    raise DecodingError(
+                        "{} line {}: "
+                        "Invalid (latin1, non-utf8) character sequence:\n{}".format(
+                            self.filename, lineNo, line,
+                    ))
                 if line.startswith('@'):
-                    lastStn = line[2:-1]
+                    lastStn = line[2:line.find('#')].strip()
                     continue
                 if not line.startswith(' ') or len(line) < minLen:
                     continue

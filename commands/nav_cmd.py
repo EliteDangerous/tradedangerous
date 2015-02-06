@@ -68,9 +68,9 @@ def run(results, cmdenv, tdb):
     hops = [ [ srcSystem, None ] ]
     if cmdenv.viaPlaces:
         for hop in cmdenv.viaPlaces:
-            hops[0][1] = hop
-            hops.insert(0, [hop, None])
-    hops[0][1] = dstSystem
+            hops[-1][1] = hop
+            hops.append([hop, None])
+    hops[-1][1] = dstSystem
 
     avoiding = [
         avoid for avoid in cmdenv.avoidPlaces
@@ -99,9 +99,9 @@ def run(results, cmdenv, tdb):
 
     if cmdenv.stations:
         stationIDs = ",".join([
-                ",".join(str(stn.ID) for stn in sys.stations)
-                for sys in route
-                if sys.stations
+                ",".join(str(stn.ID) for stn in hop[0].stations)
+                for hop in route
+                if hop[0].stations
         ])
         stmt = """
                 SELECT  si.station_id,
@@ -116,10 +116,10 @@ def run(results, cmdenv, tdb):
             ages[ID] = age
 
     for (jumpSys, dist) in route:
-        jumpLy = math.sqrt(lastSys.distToSq(jumpSys))
+        jumpLy = lastSys.distanceTo(jumpSys)
         totalLy += jumpLy
         if cmdenv.detail:
-            dirLy = math.sqrt(jumpSys.distToSq(dstSystem))
+            dirLy = jumpSys.distanceTo(dstSystem)
         row = ResultRow(
                 action='Via',
                 system=jumpSys,

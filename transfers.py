@@ -5,8 +5,24 @@ from tradeexcept import TradeException
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+import json
+import math
 import time
 import urllib.error
+
+
+try:
+    import requests
+except ImportError as e:
+    import pip
+    print("ERROR: Unable to load the Python 'requests' package.")
+    approval = input(
+        "Do you want me to try and install it with the package manager (y/n)? "
+    )
+    if approval.lower() != 'y':
+        raise e
+    pip.main(["install", "--upgrade", "requests"])
+    import requests
 
 
 ######################################################################
@@ -30,7 +46,7 @@ def makeUnit(value):
     return None
     
 
-def rateVal(bytes, started):
+def rateVal(bytes, duration):
     """
     Determine the rate at which data has been transferred.
 
@@ -41,10 +57,9 @@ def rateVal(bytes, started):
         The time.time() when the transfer started.
     """
 
-    now = time.time()
-    if bytes == 0 or now <= started:
+    if bytes == 0 or duration <= 0:
         return "..."
-    units = (makeUnit(bytes / (now - started))+"/s") or "FAST!"
+    units = (makeUnit(bytes / (duration))+"/s") or "FAST!"
     return units
 
 
@@ -101,8 +116,7 @@ def download(
     fetched = 0
     started = time.time()
 
-    # Fetch four memory pages at a time
-    chunkSize = 4096 * 4
+    chunkSize = 4096 * 16
 
     tmpPath = Path(localFile + ".dl")
     actPath = Path(localFile)
@@ -115,10 +129,19 @@ def download(
             fh.write(line.encode())
             fetched += len(line)
 
-        # Use the 'while True' approach so that we always print the
-        # download status including, especially, the 100% report.
-        while True:
-            if not cmdenv.quiet:
+        if cmdenv.quiet:
+            fh.write(f.read())
+        else:
+            # Use the 'while True' approach so that we always print the
+            # download status including, especially, the 100% report.
+            while True:
+                duration = time.time() - started
+                if bytes and duration >= 1:
+                    # estimated bytes per second
+                    rate = math.ceil(bytes / duration)
+                    # but how much can we download in 1/10s
+                    burstSize = rate / 10
+                    chunkSize += math.ceil((burstSize - chunkSize) * 0.7)
                 print("{}: "
                         "{:>{len}n}/{:>{len}n} bytes "
                         "| {:>10s} "
@@ -126,19 +149,19 @@ def download(
                         .format(
                                 localFile,
                                 fetched, bytes,
-                                rateVal(fetched, started),
+                                rateVal(fetched, duration),
                                 (fetched * 100 / bytes),
                                 len=maxBytesLen
                 ), end='\r')
 
-            if fetched >= bytes:
-                if not cmdenv.quiet:
-                    print()
-                break
+                if fetched >= bytes:
+                    if not cmdenv.quiet:
+                        print()
+                    break
 
-            chunk = f.read(chunkSize)
-            fetched += len(chunk)
-            fh.write(chunk)
+                chunk = f.read(chunkSize)
+                fetched += len(chunk)
+                fh.write(chunk)
 
     # Swap the file into place
     if backup:
@@ -152,4 +175,42 @@ def download(
     tmpPath.rename(actPath)
 
     return f.getheaders()
+
+
+def retrieve_json_data(url):
+    """
+    Fetch JSON data from a URL and return the resulting dictionary.
+
+    Displays a progress bar as it downloads.
+    """
+
+    req = requests.get(url, stream=True)
+
+    # credit for the progress indicator: 
+    # http://stackoverflow.com/a/15645088/257645
+    totalLength = req.headers.get('content-length')
+    if totalLength is None:
+        compression = req.headers.get('content-encoding')
+        compression = (compression + "'ed") if compression else "uncompressed"
+        print("Downloading {}: {}...".format(compression, url))
+        jsData = req.content
+    else:
+        totalLength = int(totalLength)
+        lastDone = None
+        for data in req.iter_content():
+            jsData += data
+            bytesRead = len(jsData)
+            done = int(50 * bytesRead / total_length)
+            if done != lastDone:
+                sys.stdout.write("\r[{:<50s}] {}/{} ".format(
+                    '=' * done,
+                    makeUnit(bytesRead),
+                    makeUnit(totalLength),
+                ))
+                sys.stdout.flush()
+                lastDone = done
+        if lastDone:
+            print("\n")
+
+    return json.loads(jsData.decode())
 

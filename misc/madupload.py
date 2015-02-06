@@ -1,46 +1,53 @@
 #! /usr/bin/env python
 
 import pathlib
-import platform
 import re
 import sys
 
 try:
     import requests
-except ImportError:
-    if platform.system() == "Windows":
-        prompt = "C:\ThisDir\>"
-    else:
-        prompt = "$"
-    raise Exception("""Missing 'requests' module:
+except ImportError as e:
+    print("""ERROR: Unable to load the Python 'requests' package.
 
-----------------------------------------------------------------
-You don't appear to have the Python module "requests" installed.
+This script uses a Python module/package called 'requests' to allow
+it to talk to maddavo's web service. This package is not installed
+by default, but it can be installed with Python's package manager (pip).
 
-It can be installed with Python's package installer, e.g:
-  {prompt} pip install requests
-or
-  {prompt} pip3 install requests
+You can either install/update it yourself, e.g.:
 
-For additional help, see:
-  Bitbucket Wiki    http://kfs.org/td/wiki
-  Facebook Group    http://kfs.org/td/group
-  ED Forum Thread   http://kfs.org/td/thread
+  pip install --upgrade requests
 
-----------------------------------------------------------------
-""".format(
-            prompt=prompt
-))
+or if you like, I can try and install it for you now
+""")
+    approval = input(
+        "Do you want me to try and install it with the package manager (y/n)? "
+    )
+    if approval.lower() != 'y':
+        print("You didn't type 'y' so I'm giving up.")
+        raise e
+    import pip
+    pip.main(["install", "--upgrade", "requests"])
+    import requests
 
 
 ############################################################################
 
 
 upload_url = 'http://www.davek.com.au/td/uploaddata.asp'
-upfile = "updated.prices"
-if len(sys.argv) > 1:
-    upfile = sys.argv[1]
+if len(sys.argv) != 2:
+    raise SystemExit(
+        "Usage: {} <filename>\n"
+        "Uploads 'filename' to Maddavo's site, where filename should be "
+        "a .prices or Station.csv file.\n"
+        "\n"
+        "NOTE to OCR USERS:\n"
+        "Please upload the .prices file from your OCR DIRECTLY before "
+        "importing it into TD, not after... We look fo rward to receiving "
+        "y0uh fxcitirg nevv oata :).\n" . format(
+            sys.argv[0]
+    ))
 
+upfile = sys.argv[1]
 
 ############################################################################
 
@@ -48,8 +55,6 @@ if len(sys.argv) > 1:
 if not pathlib.Path(upfile).is_file():
     raise SystemExit("ERROR: File not found: {}".format(upfile))
 
-files = {
-}
 r = requests.post(
         upload_url,
         files={

@@ -2,7 +2,86 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
-[work in progress]
+[wip] Feb 05 2015
+. (kfsone) Added "distanceTo" function to "System" which returns the
+       distance in ly to a second system,
+. (kfsone) Minor performance gain in distance calculations,
+
+v6.8.5 Feb 04 2015
+. (kfsone) Added "trade" command to list station-to-station trades,
+. (kfsone) "station" command now lists 5 sell and 5 buy items,
+. (kfsone) "station" does a better job of parsing existing station names,
+. (kfsone) Removed "--system" from "station" command, use
+       trade.py station -a "SYSTEM/Station"
+       syntax instead.
+. (OpenSS) Added "Run To" option to trade.bat,
+. (kfsone) Speed improvements to .csv and .prices loading,
+. (kfsone) maddavo plugin tries to explain encoding errors,
+. (chmarr) Fixed trade.py using the wrong argument list (#herp),
+. (kfsone) titleFixup will handle 'von', 'de' and 'du' correctly,
++ Station/Rare Data (RavenDT)
+
+v6.8.4 Feb 01 2015
+. (kfsone) Fixed tradecalculator not selecting most profitable trade sometimes
+. (kfsone) Set 'BRUTE_FIT' in the environment to force use of the brute-force
+        trade calculator (for diagnostic purposes). e.g.
+           BRUTE_FIT=1 trade.py run ...
+
+v6.8.3 Jan 31 2015
+. (kfsone) Code and data cleanup, added stations
+. (kfsone) Added misc/eddn.py API for developers wanting to access EDDN,
+
+v6.8.2 Jan 27 2015
+. (kfsone) Issue #148 Don't blow up horribly when tkinter is missing,
+. (kfsone) Issue #149 "nav" with --via was broken,
+. (kfsone) Typo correction in the maddavo splash (thanks, Stefan),
++ Stations: Tromador, Dave Ryalls, Jason Zions, MacNetron
+
+v6.8.1 Jan 25 2015
+. (kfsone) Additional rules to prevent data pollution (ocr derp protection),
+. (kfsone) Support for maddavo's "3 hour" prices file,
+. (kfsone) Changed how downloads work to massively improve download speeds,
+. (kfsone) Improvements to the EDSC tools,
+. (kfsone) "First time" banner explaining the maddavo import plugin,
+. (kfsone) Fixed "shipvendor" command doing a poor job of finding stations,
+. (kfsone) "submit-distances" will now prompt you to correct distances that
+        EDSC reports as needing confirmation,
+. (kfsone) Fixed a crash when data was > 1 month old,
+. (kfsone) (API) Added a helper for clipboarding data,
+. (kfsone) (API) Added misc.edsc.StarSubmissionResult,
+. (kfsone) (API) Cleaned up various pieces of code documentation,
++ Data: Systems, Stations, Ships, lots of corrections/deletions too,
+
+v6.8.0 Jan 19 2015
+. (Dirk Wilhelm/kfsone) Added 'shipvendor' command,
+. (kfsone) Issue #135 show data age in checklist / on mfd
+. (kfsone) Issue #140 explain what/why 'requests' is required,
+. (kfsone) Issue #142 "--stations" with "nav" command caused error,
+. (kfsone) Added code to fight OCR Oerp,
+. (kfsone) '--ls-max' will now also unknown (0) distances,
+. (kfsone) Added '--max-routes' for setting an absolute max on how many
+        of the top routes we use after the first hop,
+. (kfsone) Added 'submit-distances' tool for submitting EDStarCoordinator
+        star data.
+. (kfsone) Added '--prune-score' and '--prune-hops' to run; these let
+        you discard routes that are under-performing early on which
+        can make calculating longer runs more efficient.
+. (kfsone) Added "--progress" to "run" to show the current hop,
+. (kfsone) "run" and TradeCalc are much smarter about which hops
+        they will consider when using --max-age, --blackmarket, etc.
+        (big perf win)
+. (kfsone) Renamed "misc/edstarquery.py" to "misc/edsc.py"
+        - Added misc.edsc.StarSubmission
+        - Renamed misc.edsc.EDStarQuery to misc.edsc.StarQuery
+        - Changed "submit-distances" to use "StarSubmission"
+
+v6.7.0 Jan 17 2015
+. (kfsone) ".prices" import automatically creates local placeholders
+        for unknown stations when using "-i", e.g:
+            trade.py buildcache -f -i
+            trade.py import --plug=maddavo  (this plugin sets -i for you)
+. (kfsone) Added a "--ls-max" option to "run" for filtering stations
+. (kfsone) +140 Systems
 . (tKE)  "buy" sub-command now supports ship names (find a ship vendor)
 . (kfsone) Partial code/documentation cleanup
 . (kfsone) Added a "getRoute" function to TradeDB()
