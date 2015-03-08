@@ -131,7 +131,10 @@ class System(object):
     """
 
     __slots__ = (
-        'ID', 'dbname', 'posX', 'posY', 'posZ', 'stations', '_rangeCache'
+        'ID',
+        'dbname', 'posX', 'posY', 'posZ', 'stations',
+        'addedID',
+        '_rangeCache'
     )
 
     class RangeCache(object):
@@ -142,12 +145,17 @@ class System(object):
             self.systems = []
             self.probedLy = 0.
 
-    def __init__(self, ID, dbname, posX, posY, posZ):
+    def __init__(self, ID, dbname, posX, posY, posZ, addedID):
         self.ID = ID
         self.dbname = dbname
         self.posX, self.posY, self.posZ = posX, posY, posZ
+        self.addedID = addedID or 0
         self.stations = []
         self._rangeCache = None
+
+    @property
+    def system(self):
+        return self
 
     def distToSq(self, other):
         """
@@ -207,6 +215,20 @@ class System(object):
 
         return distSq ** 0.5
 
+    def getStation(self, stationName):
+        """
+        Quick case-insensitive lookup of a station name within the
+        stations in this system.
+
+        Returns:
+            Station() object if a match is found,
+            otherwise None.
+        """
+        upperName = stationName.upper()
+        for station in self.stations:
+            if station.dbname.upper() == upperName:
+                return station
+        return None
 
     def name(self):
         return self.dbname
@@ -241,19 +263,21 @@ class Station(object):
     """
     __slots__ = (
         'ID', 'system', 'dbname',
-        'lsFromStar', 'blackMarket', 'maxPadSize',
+        'lsFromStar', 'market', 'blackMarket', 'shipyard', 'maxPadSize',
         'tradingWith', 'itemCount',
         'dataAge',
     )
 
     def __init__(
             self, ID, system, dbname,
-            lsFromStar, blackMarket, maxPadSize,
+            lsFromStar, market, blackMarket, shipyard, maxPadSize,
             itemCount, dataAge,
             ):
         self.ID, self.system, self.dbname = ID, system, dbname
         self.lsFromStar = int(lsFromStar)
+        self.market = market
         self.blackMarket = blackMarket
+        self.shipyard = shipyard
         self.maxPadSize = maxPadSize
         self.itemCount = itemCount
         # dict[tradingPartnerStation] -> [ available trades ]
@@ -308,13 +332,25 @@ class Station(object):
                 return "Unk"
             else:
                 return '?'
-        if ls < 4000:
+        if ls < 1000:
             suffix = 'ls' if addSuffix else ''
             return '{:n}'.format(ls)+suffix
-        if ls < 40000:
+        if ls < 10000:
             suffix = 'ls' if addSuffix else ''
-            return '{:.1f}K'.format(ls / 1000)+suffix
+            return '{:.2f}K'.format(ls / 1000)+suffix
+        if ls < 1000000:
+            suffix = 'ls' if addSuffix else ''
+            return '{:n}K'.format(int(ls / 1000))+suffix
         return '{:.2f}ly'.format(ls / (365*24*60*60))
+
+    def isTrading(self):
+        """
+        True if the station is thought to be trading.
+
+        A station is considered 'trading' if it has an item count > 0 or
+        if it's "market" column is flagged 'Y'.
+        """
+        return (self.itemCount > 0 or self.market == 'Y')
 
     def str(self):
         return self.dbname
@@ -642,6 +678,31 @@ class TradeDB(object):
         cache.buildCache(self, self.tdenv)
 
     ############################################################
+    # Load "added" data.
+
+    def _loadAdded(self):
+        """
+        Loads the Added table as a simple dictionary
+        """
+        stmt = """
+            SELECT added_id, name
+              FROM Added
+        """
+        self.cur.execute(stmt)
+        addedByID = {}
+        for ID, name in self.cur:
+            addedByID[ID] = name
+        self.addedByID = addedByID
+        self.tdenv.DEBUG1("Loaded {:n} Addeds", len(addedByID))
+
+    def lookupAdded(self, name):
+        name = name.lower()
+        for ID, added in self.addedByID.items():
+            if added.lower() == name:
+                return ID
+        raise KeyError(name)
+
+    ############################################################
     # Star system data.
 
     def systems(self):
@@ -654,13 +715,15 @@ class TradeDB(object):
         CAUTION: Will orphan previously loaded objects.
         """
         stmt = """
-                SELECT system_id, name, pos_x, pos_y, pos_z
+                SELECT system_id,
+                       name, pos_x, pos_y, pos_z,
+                       added_id
                   FROM System
             """
         self.cur.execute(stmt)
         systemByID, systemByName = {}, {}
-        for (ID, name, posX, posY, posZ) in self.cur:
-            system = System(ID, name, posX, posY, posZ)
+        for (ID, name, posX, posY, posZ, addedID) in self.cur:
+            system = System(ID, name, posX, posY, posZ, addedID)
             systemByID[ID] = systemByName[name.upper()] = system
 
         self.systemByID, self.systemByName = systemByID, systemByName
@@ -679,7 +742,14 @@ class TradeDB(object):
             "System", key, self.systems(), key=lambda system: system.dbname
         )
 
-    def addLocalSystem(self, name, x, y, z):
+    def addLocalSystem(
+            self,
+            name,
+            x, y, z,
+            added="Local",
+            modified='now',
+            commit=True,
+            ):
         """
         Add a system to the local cache and memory copy.
         """
@@ -688,26 +758,95 @@ class TradeDB(object):
         cur = db.cursor()
         cur.execute("""
                 INSERT INTO System (
-                    name, pos_x, pos_y, pos_z, added_id
+                    name, pos_x, pos_y, pos_z, added_id, modified
                 ) VALUES (
                     ?, ?, ?, ?,
-                    (SELECT added_id
-                       FROM Added
-                      WHERE name = ?)
+                    (SELECT added_id FROM Added WHERE name = ?),
+                    DATETIME(?)
                 )
         """, [
-            name, x, y, z, 'Local',
+            name, x, y, z, added, modified,
         ])
         ID = cur.lastrowid
-        system = System(ID, name.upper(), x, y, z)
+        system = System(ID, name.upper(), x, y, z, 0)
         self.systemByID[ID] = system
         self.systemByName[system.dbname] = system
-        db.commit()
-        if not self.tdenv.quiet:
-            print("- Added new system #{}: {} [{},{},{}]".format(
-                ID, name, x, y, z
-            ))
+        if commit:
+            db.commit()
+        self.tdenv.NOTE(
+            "Added new system #{}: {} [{},{},{}]",
+            ID, name, x, y, z
+        )
         return system
+
+    def updateLocalSystem(
+            self, system,
+            name, x, y, z, added="Local", modified='now',
+            force=False,
+            commit=True,
+            ):
+        """
+        Updates an entry for a local system.
+        """
+        oldname = system.dbname
+        dbname = name.upper()
+        if not force:
+            if oldname == dbname and \
+                    system.posX == x and \
+                    system.posY == y and \
+                    system.posZ == z:
+                return False
+        del self.systemByName[oldname]
+        db = self.getDB()
+        db.execute("""
+            UPDATE System
+               SET name=?,
+                   pos_x=?, pos_y=?, pos_z=?,
+                   added=(SELECT added_id FROM Added WHERE name = ?),
+                   modified=DATETIME(?)
+        """, [
+            dbname, x, y, z, added, modified
+        ])
+        if commit:
+            db.commit()
+        self.tdenv.NOTE(
+            "{} (#{}) updated in {}: {}, {}, {}, {}, {}, {}",
+            oldname, system.ID,
+            self.dbPath if self.tdenv.detail > 1 else "local db",
+            dbname,
+            x, y, z,
+            added, modified,
+        )
+        self.systemByName[dbname] = system
+
+        return True
+
+    def removeLocalSystem(
+            self, system,
+            commit=True,
+        ):
+        """ Removes a system and it's stations from the local DB. """
+        for stn in self.stations:
+            self.removeLocalStation(stn, commit=False)
+        db = self.getDB()
+        db.execute("""
+            DELETE FROM System WHERE system_id = ?
+        """, [
+            system.ID
+        ])
+        if commit:
+            db.commit()
+        del self.systemByName[system.dbname]
+        del self.systemByID[system.ID]
+
+        self.tdenv.NOTE(
+            "{} (#{}) deleted from {}",
+            system.name(), system.ID,
+            self.dbPath if self.tdenv.detail > 1 else "local db",
+        )
+
+        system.dbname = "DELETED " + system.dbname
+        del system
 
     def __buildStellarGrid(self):
         """
@@ -827,7 +966,7 @@ class TradeDB(object):
             # No need to be conditional inside the loop
             yield from cachedSystems
 
-    def getRoute(self, origin, dest, maxJumpLy, avoiding=[]):
+    def getRoute(self, origin, dest, maxJumpLy, avoiding=[], stationInterval=0):
         """
         Find a shortest route between two systems with an additional
         constraint that each system be a maximum of maxJumpLy from
@@ -840,6 +979,10 @@ class TradeDB(object):
                 System (or station) to terminate at,
             maxJumpLy:
                 Maximum light years between systems,
+            avoiding:
+                List of systems being avoided
+            stationInterval:
+                If non-zero, require a station at least this many jumps,
 
         Returns:
             None
@@ -876,7 +1019,7 @@ class TradeDB(object):
         # Each element is a tuple of the 'priority' (the combination of
         # the total distance to the node and the distance left from the
         # node to the destination.
-        openSet = [(0, 0, origin.ID)]
+        openSet = [(0, 0, origin.ID, 0)]
         # Track predecessor nodes for everwhere we visit
         distances = {origin: (None, 0)}
         destID = dest.ID
@@ -890,8 +1033,10 @@ class TradeDB(object):
                 if isinstance(avoid, System):
                     distances[avoid] = (None, -1)
 
+        systemsInRange = self.genSystemsInRange
+
         while openSet:
-            weight, curDist, curSysID = heapq.heappop(openSet)
+            weight, curDist, curSysID, stnDist = heapq.heappop(openSet)
             # If we reached 'goal' we've found the shortest path.
             if curSysID == destID:
                 break
@@ -904,7 +1049,16 @@ class TradeDB(object):
             if curDist > distances[curSys][1]:
                 continue
 
-            for (nSys, nDist) in self.genSystemsInRange(curSys, maxJumpLy):
+            if stationInterval:
+                if curSys.stations:
+                    stnDist = 0
+                else:
+                    stnDist += 1
+
+            distFn = curSys.distanceTo
+            heappush = heapq.heappush
+
+            for (nSys, nDist) in systemsInRange(curSys, maxJumpLy):
                 newDist = curDist + nDist
                 try:
                     (prevSys, prevDist) = distances[nSys]
@@ -912,10 +1066,12 @@ class TradeDB(object):
                         continue
                 except KeyError:
                     pass
+                if stationInterval and stnDist >= stationInterval and not curSys.stations:
+                    continue
                 distances[nSys] = (curSys, newDist)
-                weight = curSys.distanceTo(nSys)
+                weight = distFn(nSys)
                 nID = nSys.ID
-                heapq.heappush(openSet, (newDist + weight, newDist, nID))
+                heappush(openSet, (newDist + weight, newDist, nID, stnDist))
                 if nID == destID:
                     distTo = newDist
 
@@ -950,7 +1106,11 @@ class TradeDB(object):
         """
         stmt = """
             SELECT  station_id, system_id, name,
-                    ls_from_star, blackmarket, max_pad_size,
+                    ls_from_star,
+                    market,
+                    blackmarket,
+                    shipyard,
+                    max_pad_size,
                     COUNT(StationItem.station_id) AS itemCount,
                     JULIANDAY('now') - JULIANDAY(MAX(StationItem.modified))
               FROM  Station
@@ -963,12 +1123,12 @@ class TradeDB(object):
         self.tradingStationCount = 0
         for (
             ID, systemID, name,
-            lsFromStar, blackMarket, maxPadSize,
+            lsFromStar, market, blackMarket, shipyard, maxPadSize,
             itemCount, dataAge
         ) in self.cur:
             station = Station(
                 ID, systemByID[systemID], name,
-                lsFromStar, blackMarket, maxPadSize,
+                lsFromStar, market, blackMarket, shipyard, maxPadSize,
                 itemCount, dataAge
             )
             if itemCount > 0:
@@ -983,26 +1143,37 @@ class TradeDB(object):
             self,
             system,
             name,
-            lsFromStar,
-            blackMarket,
-            maxPadSize,
+            lsFromStar=0,
+            market='?',
+            blackMarket='?',
+            shipyard='?',
+            maxPadSize='?',
+            modified='now',
+            commit=True,
             ):
         """
         Add a station to the local cache and memory copy.
         """
 
+        market = market.upper()
         blackMarket = blackMarket.upper()
+        shipyard = shipyard.upper()
         maxPadSize = maxPadSize.upper()
+        assert market in "?YN"
         assert blackMarket in "?YN"
+        assert shipyard in "?YN"
         assert maxPadSize in "?SML"
 
         self.tdenv.DEBUG0(
-            "Adding {}/{} ls={}, bm={}, pad={}",
+            "Adding {}/{} ls={}, mkt={}, bm={}, yard={}, pad={}, mod={}",
             system.name(),
             name,
             lsFromStar,
+            market,
             blackMarket,
-            maxPadSize
+            shipyard,
+            maxPadSize,
+            modified,
         )
 
         db = self.getDB()
@@ -1010,96 +1181,179 @@ class TradeDB(object):
         cur.execute("""
             INSERT INTO Station (
                 name, system_id,
-                ls_from_star, blackmarket, max_pad_size
+                ls_from_star, market, blackmarket, shipyard, max_pad_size,
+                modified
             ) VALUES (
                 ?, ?,
-                ?, ?, ?
+                ?, ?, ?, ?, ?,
+                DATETIME(?)
             )
         """, [
             name, system.ID,
-            lsFromStar, blackMarket.upper(), maxPadSize.upper(),
+            lsFromStar, market, blackMarket, shipyard, maxPadSize,
+            modified,
         ])
         ID = cur.lastrowid
         station = Station(
             ID, system, name,
             lsFromStar=lsFromStar,
+            market=market,
             blackMarket=blackMarket,
+            shipyard=shipyard,
             maxPadSize=maxPadSize,
             itemCount=0, dataAge=0,
         )
         self.stationByID[ID] = station
-        db.commit()
+        if commit:
+            db.commit()
         self.tdenv.NOTE(
-            "{} (#{}) added to {} db: "
-            "ls={}, bm={}, pad={}",
-            station.name(), station.ID, self.dbPath,
-            lsFromStar, blackMarket, maxPadSize,
+            "{} (#{}) added to {}: "
+            "ls={}, mkt={}, bm={}, yard={}, pad={}, mod={}",
+            station.name(), station.ID,
+            self.dbPath if self.tdenv.detail > 1 else "local db",
+            lsFromStar, market, blackMarket, shipyard, maxPadSize,
+            modified,
         )
         return station
 
+
     def updateLocalStation(
             self, station,
+            name=None,
             lsFromStar=None,
+            market=None,
             blackMarket=None,
+            shipyard=None,
             maxPadSize=None,
+            modified='now',
             force=False,
+            commit=True,
             ):
         """
         Alter the properties of a station in-memory and in the DB.
         """
-        changes = False
+        changes = []
+
+        def _changed(label, old, new):
+            changes.append(
+                "{}('{}'=>'{}')".format(label, old, new)
+            )
+
+        if name is not None:
+            if force or name.upper() != station.dbname.upper():
+                _changed("name", station.dbname, name)
+                station.dbname = name
 
         if lsFromStar is not None:
             assert lsFromStar >= 0
             if lsFromStar != station.lsFromStar:
                 if lsFromStar > 0 or force:
+                    _changed("ls", station.lsFromStar, lsFromStar)
                     station.lsFromStar = lsFromStar
-                    changes = True
+
+        if market is not None:
+            market = market.upper()
+            assert market in TradeDB.marketStates
+            if market != station.market:
+                if market != '?' or force:
+                    _changed("mkt", station.market, market)
+                    station.market = market
 
         if blackMarket is not None:
             blackMarket = blackMarket.upper()
             assert blackMarket in TradeDB.marketStates
             if blackMarket != station.blackMarket:
                 if blackMarket != '?' or force:
+                    _changed("blkmkt", station.blackMarket, blackMarket)
                     station.blackMarket = blackMarket
-                    changes = True
+
+        if shipyard is not None:
+            shipyard = shipyard.upper()
+            assert shipyard in TradeDB.marketStates
+            if shipyard != station.shipyard:
+                if shipyard != '?' or force:
+                    _changed("shipyd", station.shipyard, shipyard)
+                    station.shipyard = shipyard
 
         if maxPadSize is not None:
             maxPadSize = maxPadSize.upper()
             assert maxPadSize in TradeDB.padSizes
             if maxPadSize != station.maxPadSize:
                 if maxPadSize != '?' or force:
+                    _changed("pad", station.maxPadSize, maxPadSize)
                     station.maxPadSize = maxPadSize
-                    changes = True
 
         if not changes:
-            self.tdenv.NOTE("No changes")
             return False
 
         db = self.getDB()
         db.execute("""
             UPDATE Station
-               SET ls_from_star=?,
+               SET name=?,
+                   ls_from_star=?,
+                   market=?,
                    blackmarket=?,
-                   max_pad_size=?
+                   shipyard=?,
+                   max_pad_size=?,
+                   modified=DATETIME(?)
              WHERE station_id = ?
         """, [
+            station.dbname,
             station.lsFromStar,
+            station.market,
             station.blackMarket,
+            station.shipyard,
             station.maxPadSize,
+            modified,
             station.ID
         ])
-        db.commit()
+        if commit:
+            db.commit()
 
         self.tdenv.NOTE(
-            "{} (#{}) updated in {}: ls={}, bm={}, pad={}",
-            station.name(), station.ID, self.dbPath,
-            station.lsFromStar,
-            station.blackMarket,
-            station.maxPadSize,
+            "{} (#{}) updated in {}: {}",
+            station.name(), station.ID,
+            self.dbPath if self.tdenv.detail > 1 else "local db",
+            ", ".join(changes)
         )
 
         return True
+
+
+    def removeLocalStation(self, station, commit=True):
+        """
+        Removes a station from the local database and memory image.
+
+        Becareful of any references to the station you may still have
+        after this.
+        """
+
+        # Remove reference from my system
+        system = station.system
+        system.stations.remove(station)
+
+        # Remove the ID lookup
+        del self.stationByID[station.ID]
+
+        # Delete database entry
+        db = self.getDB()
+        db.execute("""
+            DELETE FROM Station
+             WHERE system_id = ? AND station_id = ?
+        """, [system.ID, station.ID]
+        )
+        if commit:
+            db.commit()
+
+        self.tdenv.NOTE(
+            "{} (#{}) deleted from {}",
+            station.name(), station.ID,
+            self.dbPath if self.tdenv.detail > 1 else "local db",
+        )
+
+        station.dbname = "DELETED "+station.dbname
+        del station
+
 
     def lookupPlace(self, name):
         """
@@ -1435,16 +1689,12 @@ class TradeDB(object):
                     stnLs = station.lsFromStar
                     if stnLs <= 0 or stnLs > maxLsFromStar:
                         continue
-                destStations.append(
-                    Destination(
+                yield Destination(
                         node.system,
                         station,
                         node.via,
                         node.distLy
-                    )
                 )
-
-        return destStations
 
     ############################################################
     # Ship data.
@@ -1770,7 +2020,7 @@ class TradeDB(object):
         self.conn = conn = self.getDB()
         self.cur = conn.cursor()
 
-        # Load raw tables.
+        self._loadAdded()
         self._loadSystems()
         self._loadStations()
         self._loadShips()

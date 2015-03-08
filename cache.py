@@ -188,7 +188,6 @@ ocrDerp = re.compile(r'''(
     '' |
     ^[^A-Z0-9] |
     \s{2,} |
-    \S\s\S\s |
     ^OEN |
     ^MCK(EF|FE)\b |
     \bCHAN\s+DLER |
@@ -218,9 +217,41 @@ ocrDerp = re.compile(r'''(
     ‹ |
     \bSATION\b |
     ,\w |
-    \bINGLY\b |
-    \bAU\sL[DO0]\b
-
+    \bI?NGLY\b |
+    \bAU\sL[DO0]\b |
+    (^|\s)['.] |
+    ^- | -$ |
+    \bDREBBFL\b
+    \bLEVIE |
+    \bRN\b |
+    \bH\sUNZIKER |
+    \bL[O0D]FTH\sUS |
+    \bHORNUCH\b |
+    \bKLU\sDZE |
+    ^[DR]HN\b |
+    SU\sI?RVEY\b |
+    H[DO0]L[O0]ING |
+    H[D0]LDING |
+    M[DO0]HMAN[O0] |
+    \bABL\b |
+    \bBENNET\b |
+    \bHU8\b |
+    \sCITV$ |
+    \sPIT[VY]$ |
+    \bTFR |
+    IVII |
+    \BINAI$ |
+    SET[IT]''LEMEN |
+    I'L | R'I | (^|\s)'L | [^Ss]'(?=\s|$) |
+    ^I \s (?! [Ss][Oo][Ll][Aa]) |
+    \bA7\S |
+    \sH\sI?UB$ |
+    \bALEDNDRIA\b |
+    \sH\sU\sB$ |
+    \bC[O0]LCNY\b |
+    \bOOCTE\b |
+    \bBULGAFIIN\b |
+    \bWH\sIEEL
 )''', flags=re.X)
 
 
@@ -421,13 +452,14 @@ def getItemByNameIndex(cur):
 
 
 def checkForOcrDerp(tdenv, systemName, stationName):
-    if ocrDerp.search(stationName):
+    match = ocrDerp.search(stationName)
+    if match:
         tdenv.NOTE(
             "Ignoring '{}/{}' because it looks like OCR derp."
             .format(systemName, stationName)
         )
-        return True
-    return False
+        return match
+    return None
 
 
 def processPrices(tdenv, priceFile, db, defaultZero):
@@ -554,14 +586,17 @@ def processPrices(tdenv, priceFile, db, defaultZero):
                     system_id, name,
                     ls_from_star,
                     blackmarket,
-                    max_pad_size
+                    max_pad_size,
+                    market,
+                    shipyard,
+                    modified
                 ) VALUES (
-                    ?, ?, 0, '?', '?'
+                    ?, ?, 0, '?', '?', '?', '?',
+                    DATETIME('now')
                 )
             """, [systemID, name])
             newID = inscur.lastrowid
             stationByName[facility] = newID
-            db.commit()
             tdenv.NOTE("Added local station placeholder for {} (#{})",
                     facility, newID
             )
@@ -574,7 +609,7 @@ def processPrices(tdenv, priceFile, db, defaultZero):
                 return
             raise MultipleStationEntriesError(
                         priceFile, lineNo, facility,
-                        processedStations[stationID]
+                        processedStations[newID]
                     )
 
         stationID = newID
@@ -1097,3 +1132,28 @@ def importDataFromFile(tdb, tdenv, path, pricesFh=None, reset=False):
     # If everything worked, we may need to re-build the prices file.
     if path != tdb.pricesPath:
         regeneratePricesFile(tdb, tdenv)
+
+
+def test_derp(tdb=None, tdenv=None):
+    """
+    Test whether the station names in a trade database are free of derp.
+
+    Examples:
+        import tradedb
+        tdb = tradedb.TradeDB()
+        test_derp(tdb)
+
+        python -i cache.py
+        >>> test_derp()
+    """
+    tdb = tdb or tradedb.TradeDB()
+    tdenv = tdenv or tdb.tdenv
+    matches = 0
+    for stn in tdb.stationByID.values():
+        m = checkForOcrDerp(tdenv, stn.system.dbname, stn.dbname)
+        if m:
+            print("Match", m.groups(1))
+            matches += 1
+    if not matches:
+        print("Current data is free of known derp")
+

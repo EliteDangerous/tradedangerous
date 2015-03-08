@@ -17,6 +17,7 @@ import commands.checkprices_cmd
 import commands.export_cmd
 import commands.import_cmd
 import commands.local_cmd
+import commands.market_cmd
 import commands.nav_cmd
 import commands.olddata_cmd
 import commands.rares_cmd
@@ -195,7 +196,7 @@ class CommandIndex(object):
                     action=HelpAction, nargs=0,
                 )
         stdArgs.add_argument('--debug', '-w',
-                    help='Enable diagnostic output.',
+                    help='Enable/raise level of diagnostic output.',
                     default=0, required=False, action='count',
                 )
         stdArgs.add_argument('--detail', '-v',

@@ -264,17 +264,13 @@ RUN sub-command:
          --to Beagle2
          --to lhs64
 
-     --start-jumps N
-     -s N
-       Considers stations from systems upto this many jumps from your
-       specified start location.
-         --from beagle2 --ly-per 7.56 --empty 10.56 -s 2
-
-     --end-jumps N
-     -e N
-       Considers stations from systems upto this many jumps from your
-       specified destination (--to).
-         --to lave -e 3      (find runs that end within 3 jumps of lave)
+     --towards <goal system>
+       Builds a route that tries to shorten the distance from your origin
+       and goal. Destinations that would increase the distance are ignored.
+       Tries to avoid routes that go backwards or detour. If you want to
+       avoid multiple visits in the same system, use --unique.
+       e.g.
+         --from iBootis --to LiuBese
 
      --via <station or system>
        Lets you specify a station that must be between the second and final hop.
@@ -296,6 +292,24 @@ RUN sub-command:
        e.g.
          -jumps-per 5
 
+     --direct
+       Assumes a single hop and doesn't worry about travel between
+       source and destination.
+       e.g.
+         --from achenar --to lave --direct
+
+     --start-jumps N
+     -s N
+       Considers stations from systems upto this many jumps from your
+       specified start location.
+         --from beagle2 --ly-per 7.56 --empty 10.56 -s 2
+
+     --end-jumps N
+     -e N
+       Considers stations from systems upto this many jumps from your
+       specified destination (--to).
+         --to lave -e 3      (find runs that end within 3 jumps of lave)
+
 
    Filter options:
      --max-days-old N.NN
@@ -311,7 +325,7 @@ RUN sub-command:
        Limit results to stations that match one of the pad sizes
        specified.
          --pad ML?            (med, lrg or unknown only)
-         -o ML?                 ""    ""      ""    ""
+         -p ML?                 ""    ""      ""    ""
          --pad ?              (unknown only),
          --pad L              (large only, ignores unknown)
 
@@ -532,6 +546,22 @@ IMPORT sub-command:
     --maddavo
       Like 'url' but specifies the URL for maddavo's .prices file
 
+      This has also additional options:
+      --option=<option> where option is one of the following:
+        systems:      Merge maddavo's System data into local db,
+        stations:     Merge maddavo's Station data into local db,
+        shipvendors:  Merge maddavo's ShipVendor data into local db,
+        csvs:         Merge all of the above
+        exportcsv:    Regenerate System and Station .csv files after
+                      merging System/Station data.
+        csvonly:      Stop after importing CSV files, no prices,
+        skipdl:       Skip doing any downloads.
+        force:        Process prices even if timestamps suggest
+                      there is no new data.
+        use3h:        Force download of the 3-hours .prices file
+        use2d:        Force download of the 2-days .prices file
+        usefull:      Force download of the full .prices file
+
     --ignore-unknown
     -i
       Any systems, stations, categories or items that aren't recognized
@@ -569,6 +599,22 @@ RARES sub-command:
        e.g.
          --limit 10
 
+     --reverse
+     -r
+       Reverse the order, can be used with "--ly" and "--limit" to find
+       the furthest-away rares
+
+    --away N.NN
+    --from SYSTEM1 --from SYSTEM2 ... --from SYSTEMN
+      Limits results to systems that are at least a given distance away
+      from additional systems.
+      e.g.
+        trade.py rare --ly 160 sol -r --away 140 --from lave
+          Shows systems starting at 160ly or less from sol,
+          but that are also 140ly or more from lave.
+        trade.py rare --ly 160 sol -r --away 140 --from lave --from xihe
+          As above but also compares for <= 140ly from xihe
+
     --pad-size SML?
     --pad SML?
     -p
@@ -582,11 +628,6 @@ RARES sub-command:
      --price-sort
      -P
        Sort by price rather than proximity
-
-     --reverse
-     -r
-       Reverse the order, can be used with "--ly" and "--limit" to find
-       the furthest-away rares
 
      --quiet
      -q
@@ -619,6 +660,51 @@ RARES sub-command:
     ANY NA/Libby Orbital         Any Na Coffee              1,790 170.32     11          ?   ?
 
 
+MARKET sub-command:
+
+  Lists items bought / sold at a given station; with --detail (-v) also
+  includes the average price for those items.
+
+  trade.py market <station> [--buy | --sell] [--detail]
+
+    station
+      Name of the station to list, e.g. "paes/ramon" or "ramoncity",
+
+    --buy
+    -B
+      List only items bought by the station (listed as 'SELL' in-game)
+
+    --sell
+    -S
+      List only items sold by the station (listed as 'BUY' in-game)
+
+    --detail
+    -v
+      Once: includes average prices
+      Twice: include demand column and category headings
+
+    $ trade.py market --buy ramoncity
+    Item                    Buying
+    ------------------------------
+    Hydrogen Fuel               90
+    Clothing                   221
+    Domestic Appliances        417
+    Food Cartridges             35
+    ...
+
+    $ trade.py market --buy --sell ramoncity -v
+        Item                    Buying     Avg Age/Days Selling     Avg   Supply Age/Days
+    -------------------------------------------------------------------------------------
+    +CHEMICALS
+        Hydrogen Fuel               90     100     0.01      94     102  74,034H     0.01
+    +CONSUMER ITEMS
+        Clothing                   221     361     0.01     237     238   1,706M     0.01
+        Domestic Appliances        417     582     0.01     437     436   1,022M     0.01
+    +FOODS
+        Food Cartridges             35     125     0.01      45      50  32,019H     0.01
+
+    ...
+
 NAV sub-command:
 
   Provides details of routes without worrying about trade. By default, if
@@ -637,6 +723,13 @@ NAV sub-command:
 
     --stations
       Lists stations at each stop
+
+    --refuel-jumps N
+    --ref N
+      Specify the maximum consecutive systems which do not have stations
+      you can pass through. For example "--ref 1" would require every
+      jump on the route have a station. "--ref 2" would require that
+      you not make more than one stationless jump after another.
 
     from
       Name of the starting system or a station in the system,
@@ -686,12 +779,23 @@ LOCAL sub-command:
     --pad-size SML?
     --pad SML?
     -p
-      Limit results to stations that match one of the pad sizes
-      specified.
+      Limit stations to those that match one of the pad sizes specified.
         --pad ML?            (med, lrg or unknown only)
-        -o ML?                 ""    ""      ""    ""
+        -p ML?                 ""    ""      ""    ""
         --pad ?              (unknown only),
         --pad L              (large only, ignores unknown)
+
+    --stations
+      Limit results to systems which have stations
+
+    --trading
+      Limit stations to those which which have markets or trade data.
+
+    --shipyard
+      Limit stations to those known to have a shipyard.
+
+    --blackmarket
+      Limit stations to those known to have a black market.
 
     -v
       Show stations + their distance from star
@@ -733,14 +837,34 @@ LOCAL sub-command:
     Adding detail ('-vv' or '-v -v' or '--detail --detail') would add
     a count of the number of items we have prices for at each station.
 
+    > trade.py local LAVE --trading --ly 4 -vv
+    System    Dist
+      /  Station            StnLs Age/days Mkt BMk Shp Pad Itms
+    -----------------------------------------------------------
+    LAVE      0.00
+      /  Castellan Station  2.34K     2.57 Yes  No  No Med   37
+      /  Lave Station         299     7.79 Yes Yes Yes Lrg   33
+      /  Warinus              863     7.76 Yes Yes  No Med   38
+    DISO      3.59
+      /  Shifnalport          284     0.57 Yes Yes Yes Lrg   34
+    LEESTI    3.91
+      /  George Lucas         255     0.58 Yes Yes Yes Lrg   52
+      /  Kolmogorov Hub     2.96K     1.61 Yes Yes  No Med   53
+
+    > trade.py local SOL --blackmarket --ly 6 -vv
+
 
 BUY sub-command:
 
-  Looks for stations selling the specified item or ship.
-  
-  For items, that means they have a non-zero asking price and a stock level other than "n/a".
+  Finds stations that are selling / where you can buy, a named list of
+  items or ships.
 
-  trade.py buy [-q | -v] [--quantity Q] [--near N] [--ly-per N] item [-P | -S] [--limit]
+  trade.py buy
+        [-q | -v] [--quantity Q] [--near N] [--ly-per N]
+        [-P | -S] [--limit]
+        [--one-stop | -1]
+        item [item item,item ...]
+        ship [ship ship,ship ...]
 
     --quantity Q
       Requires that the stock level be unknown or at least this value,
@@ -751,6 +875,11 @@ BUY sub-command:
       Only considers stations within reach of the specified system.
       --near chango
 
+    --one-stop
+    -1
+      When multiple items or ships are listed, only lists stations
+      which have all of them.
+
     --limit N
       Limit how many results re shown
       --limit 5
@@ -758,6 +887,10 @@ BUY sub-command:
     --ly-per N.N
       Sets the range of --near (requires --near)
       --near chango --ly 10
+
+    --lt NNN
+    --gt NNN
+      Specify min (gt) and max (lt) prices for items
 
     --pad-size SML?
     --pad SML?
@@ -777,6 +910,12 @@ BUY sub-command:
     --stock-sort
     -S
       Sorts items by stock available first and then price
+
+  Example
+    trade.py buy --near achenar food
+    trade.py buy asp
+    trade.py buy --near achenar food,clothing,scrap --one-stop
+    trade.py buy --near achenar type6,type7 -1
 
 
 SELL sub-command:
@@ -801,6 +940,10 @@ SELL sub-command:
     --ly-per N.N
       Sets the range of --near (requires --near)
       --near chango --ly 10
+
+    --lt NNN
+    --gt NNN
+      Specify min (gt) and max (lt) prices for items
 
     --pad-size SML?
     --pad SML?
