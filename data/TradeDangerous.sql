@@ -117,16 +117,24 @@ CREATE TABLE Station
    name VARCHAR(40) COLLATE nocase,
    system_id INTEGER NOT NULL,
    ls_from_star INTEGER NOT NULL DEFAULT 0
-       CHECK (ls_from_star >= 0),
+                CHECK (ls_from_star >= 0),
    blackmarket TEXT(1) NOT NULL DEFAULT '?'
-       CHECK (blackmarket IN ('?', 'Y', 'N')),
+               CHECK (blackmarket IN ('?', 'Y', 'N')),
    max_pad_size TEXT(1) NOT NULL DEFAULT '?'
-       CHECK (max_pad_size IN ('?', 'S', 'M', 'L')),
+                CHECK (max_pad_size IN ('?', 'S', 'M', 'L')),
    market TEXT(1) NOT NULL DEFAULT '?'
-       CHECK (market IN ('?', 'Y', 'N')),
+          CHECK (market IN ('?', 'Y', 'N')),
    shipyard TEXT(1) NOT NULL DEFAULT '?'
-       CHECK (shipyard IN ('?', 'Y', 'N')),
-   modified DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            CHECK (shipyard IN ('?', 'Y', 'N')),
+   outfitting TEXT(1) NOT NULL DEFAULT '?'
+              CHECK (outfitting IN ('?', 'Y', 'N')),
+   rearm TEXT(1) NOT NULL DEFAULT '?'
+         CHECK (rearm IN ('?', 'Y', 'N')),
+   refuel TEXT(1) NOT NULL DEFAULT '?'
+          CHECK (refuel IN ('?', 'Y', 'N')),
+   repair TEXT(1) NOT NULL DEFAULT '?'
+          CHECK (repair IN ('?', 'Y', 'N')),
+   modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
    UNIQUE (system_id, name),
 
