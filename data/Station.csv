@@ -1,4 +1,7 @@
 unq:name@System.system_id,unq:name,ls_from_star,blackmarket,max_pad_size,market,shipyard,outfitting,rearm,refuel,repair,modified
+'APALA','Popper Port',1320,'Y','M','Y','N','N','Y','Y','N','2015-03-20 11:04:44'
+'APALA','Walker Port',2003,'N','M','Y','N','Y','Y','Y','Y','2015-03-20 11:14:53'
+'APALA','Wilson City',30,'N','L','Y','Y','Y','Y','Y','Y','2015-03-20 10:42:12'
 'BD+47 2112','Orsini Mining Platform',231,'Y','L','Y','Y','Y','Y','Y','Y','2015-03-15 13:37:16'
 'G 239-25','Bresnik Mine',32,'Y','L','Y','N','N','Y','Y','Y','2015-03-15 17:36:30'
 'LHS 3006','Frimout Legacy',452,'Y','M','N','N','Y','Y','Y','Y','2015-03-15 13:37:16'

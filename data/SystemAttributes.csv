@@ -1,4 +1,10 @@
 name@System.system_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+'APALA','Allegiance','Independent',''
+'APALA','Economy','High Tech',''
+'APALA','Economy','Refinery',''
+'APALA','Government','Corporate',''
+'APALA','Population','manual Number','17680971'
+'APALA','Security','Medium',''
 'BD+47 2112','Allegiance','Federation',''
 'BD+47 2112','Economy','Extraction',''
 'BD+47 2112','Government','Confederacy',''
