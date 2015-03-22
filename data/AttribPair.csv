@@ -7,6 +7,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 1,'Economy','High Tech'
 1,'Economy','Industrial'
 1,'Economy','Refinery'
+1,'Economy','Terraforming'
 1,'Economy','Tourism'
 1,'Government','Anarchy'
 1,'Government','Communism'
