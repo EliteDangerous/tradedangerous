@@ -44,14 +44,14 @@ def check_price_bounds(
         deletion = (
             "DELETE FROM {} "
             "WHERE item_id = {} "
-            "AND price {} {}".format(
+            "AND price > 0 AND price {} {}".format(
                 table, item.ID, compare, value
         ))
         deletions.append((deletion, "{}".format(item.dbname)))
         count = 0
         for (stnID,) in tdb.query("""
                     SELECT station_id FROM {}
-                     WHERE item_id = {} AND price {} {}
+                     WHERE item_id = {} AND price > 0 AND price {} {}
                 """.format(
                     table, item.ID, compare, value,
                 )):
@@ -71,6 +71,7 @@ def check_price_bounds(
             SELECT price
               FROM {}
              WHERE item_id = ?
+               AND price > 0
         """.format(table), [item.ID])
         prices = [ row[0] for row in cur ]
         if not prices:
@@ -124,7 +125,7 @@ def check_price_bounds(
             mask.format(
                 numPrices,
                 item.dbname,
-                prices[0] if prices[0] < lowCutoff else '-',
+                prices[0],
                 lowCutoff,
                 low, 
                 mid,
@@ -132,7 +133,7 @@ def check_price_bounds(
                 midavg,
                 high,
                 highCutoff,
-                prices[-1] if prices[-1] > highCutoff else '-',
+                prices[-1],
                 '{:<4s} {:>4n}'.format(error, count),
             ),
             colorama.Fore.RESET,
@@ -153,7 +154,14 @@ def check_price_bounds(
                 print("@ {}".format(station.name()), file=fh)
                 for item in items:
                     itemID = item[0]
-                    print("  {} 0 0 - - {} # was {}{}".format(tdb.itemByID[itemID].name(), now, item[1], item[2]), file=fh)
+                    print("      {:<30} {:>7} {:>7} {:>9} {:>9} {}"
+                        .format(
+                            tdb.itemByID[itemID].name(),
+                            0, 0,
+                            '-', '-',
+                            now,
+                        ), file=fh
+                    )
         if doDeletions:
             db = tdb.getDB()
         print("Generating", deleteSql)
