@@ -70,6 +70,7 @@ unq:table_id,unq:name@Attributes.attrib_id,unq:name@AttribValues.value_id
 2,'Type','Civilian'
 2,'Type','Commercial'
 2,'Type','Coriolis'
+2,'Type','Extension Arms'
 2,'Type','Industrial'
 2,'Type','Military'
 2,'Type','Mining'
