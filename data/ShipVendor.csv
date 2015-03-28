@@ -45,6 +45,8 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,mod
 'BD+47 2112','Orsini Mining Platform','Eagle','2015-03-15 13:37:16'
 'BD+47 2112','Orsini Mining Platform','Hauler','2015-03-15 13:37:16'
 'BD+47 2112','Orsini Mining Platform','Sidewinder','2015-03-15 13:37:16'
+'DJUHTI','Brunner Colony','Eagle','2015-03-28 21:34:17'
+'DJUHTI','Brunner Colony','Sidewinder','2015-03-28 21:34:10'
 'ETA DRACONIS','Alvares Terminal','Adder','2015-03-28 11:08:36'
 'ETA DRACONIS','Alvares Terminal','Eagle','2015-03-28 11:08:26'
 'ETA DRACONIS','Alvares Terminal','Hauler','2015-03-28 11:08:31'
