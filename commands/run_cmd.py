@@ -25,7 +25,7 @@ arguments = [
     ParseArgument('--credits',
             help='Starting credits.',
             metavar='CR',
-            type=int,
+            type="credits",
         ),
 ]
 
@@ -150,13 +150,13 @@ switches = [
     ParseArgument('--gain-per-ton', '--gpt',
             help='Specify the minimum gain per ton of cargo',
             dest='minGainPerTon',
-            type=int,
+            type="credits",
             default=1
         ),
     ParseArgument('--max-gain-per-ton', '--mgpt',
             help='Specify the maximum gain per ton of cargo',
             dest='maxGainPerTon',
-            type=int,
+            type="credits",
             default=10000
         ),
     ParseArgument('--unique',
@@ -176,7 +176,7 @@ switches = [
             help='Reserve at least this many credits to cover insurance.',
             default=0,
             metavar='CR',
-            type=int,
+            type="credits",
         ),
     ParseArgument('--routes',
             help='Maximum number of routes to show. DEFAULT: 1',
@@ -1037,16 +1037,6 @@ def run(results, cmdenv, tdb):
             restrictTo = viaSet
             manualRestriction = True
 
-        if hopNo >= 1 and cmdenv.maxRoutes or pruneMod:
-            routes.sort()
-            if pruneMod and hopNo + 1 >= cmdenv.pruneHops and len(routes) > 10:
-                crop = int(len(routes) * pruneMod)
-                routes = routes[:-crop]
-                cmdenv.NOTE("Pruned {} origins", crop)
-
-            if cmdenv.maxRoutes and len(routes) > cmdenv.maxRoutes:
-                routes = routes[:cmdenv.maxRoutes]
-
         if distancePruning:
             remainingDistance = (numHops - hopNo) * maxHopDistLy
             def routeStillHasAChance(r):
@@ -1061,6 +1051,16 @@ def run(results, cmdenv, tdb):
             pruned = preCrop - len(routes)
             if pruned:
                 cmdenv.NOTE("Pruned {} origins too far from any end stations", pruned)
+
+        if hopNo >= 1 and (cmdenv.maxRoutes or pruneMod):
+            routes.sort()
+            if pruneMod and hopNo + 1 >= cmdenv.pruneHops and len(routes) > 10:
+                crop = int(len(routes) * pruneMod)
+                routes = routes[:-crop]
+                cmdenv.NOTE("Pruned {} origins", crop)
+
+            if cmdenv.maxRoutes and len(routes) > cmdenv.maxRoutes:
+                routes = routes[:cmdenv.maxRoutes]
 
         if cmdenv.progress:
             print("* Hop {:3n}: {:.>10n} origins".format(hopNo+1, len(routes)))
