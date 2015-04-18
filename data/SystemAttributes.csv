@@ -1,4 +1,10 @@
 name@System.system_id,name@Attributes.attrib_id,name@AttribValues.value_id,value
+'22 G LEONIS','Allegiance','Federation',''
+'22 G LEONIS','Economy','Extraction',''
+'22 G LEONIS','Economy','Refinery',''
+'22 G LEONIS','Government','Democracy',''
+'22 G LEONIS','Population','manual Number','36219'
+'22 G LEONIS','Security','Medium',''
 '35 DRACONIS','Allegiance','Independent',''
 '35 DRACONIS','Economy','Industrial',''
 '35 DRACONIS','Economy','Refinery',''

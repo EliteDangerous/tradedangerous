@@ -1,4 +1,13 @@
 !name@System.system_id,name@Station.station_id,name@Attributes.attrib_id,name@AttribValues.value_id
+'22 G LEONIS','Banks Dock','Allegiance','Federation'
+'22 G LEONIS','Banks Dock','Economy','Extraction'
+'22 G LEONIS','Banks Dock','Economy','Refinery'
+'22 G LEONIS','Banks Dock','Facility','Commodities'
+'22 G LEONIS','Banks Dock','Facility','Refuel'
+'22 G LEONIS','Banks Dock','Facility','Repair'
+'22 G LEONIS','Banks Dock','Government','Democracy'
+'22 G LEONIS','Banks Dock','Type','Industrial'
+'22 G LEONIS','Banks Dock','Type','Outpost'
 '35 DRACONIS','Conway Dock','Allegiance','Independent'
 '35 DRACONIS','Conway Dock','Economy','Industrial'
 '35 DRACONIS','Conway Dock','Economy','Refinery'
