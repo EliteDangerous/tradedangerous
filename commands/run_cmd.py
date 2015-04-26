@@ -780,13 +780,14 @@ def validateRunArguments(tdb, cmdenv, calc):
             cmdenv.NOTE("--loop-int > hops implies --unique")
             cmdenv.unique = True
 
-    if cmdenv.shorten and not cmdenv.ending:
-        raise CommandLineError(
-            "--shorten only works with --to."
-        )
+    if cmdenv.shorten:
         if cmdenv.loop:
             raise CommandLineError(
                 "Cannot use --shorten and --loop together"
+            )
+        if not cmdenv.ending:
+            raise CommandLineError(
+                "--shorten only works with --to."
             )
 
     checkOrigins(tdb, cmdenv, calc)
@@ -1002,7 +1003,7 @@ def routeFailedRestrictions(
     places = list(
         set(
             chain.from_iterable(
-                [place] if isinstance(place, Station) else place.stations
+                (place,) if isinstance(place, Station) else place.stations
                 for place in restrictTo
             )
         )
@@ -1063,9 +1064,9 @@ def run(results, cmdenv, tdb):
     startCr = cmdenv.credits - cmdenv.insurance
     routes = [
         Route(
-            stations=[src],
-            hops=[],
-            jumps=[],
+            stations=(src,),
+            hops=(),
+            jumps=(),
             startCr=startCr,
             gainCr=0,
             score=0
@@ -1089,6 +1090,22 @@ def run(results, cmdenv, tdb):
         maxHopDistLy = cmdenv.maxJumpsPer * cmdenv.maxLyPer
         if not cmdenv.loop:
             stopSystems = {stop.system for stop in stopStations}
+
+    if cmdenv.loop:
+        routePickPred = lambda route: \
+            route.lastStation is route.firstStation
+    elif cmdenv.shorten:
+        if not cmdenv.destPlace:
+            routePickPred = lambda route: \
+                route.lastStation is route.firstStation
+        elif isinstance(cmdenv.destPlace, System):
+            routePickPred = lambda route: \
+                route.lastSystem is cmdenv.destPlace
+        else:
+            routePickPred = lambda route: \
+                route.lastStation is cmdenv.destPlace
+    else:
+        routePickPred = None
 
     pickedRoutes = []
     for hopNo in range(numHops):
@@ -1212,28 +1229,21 @@ def run(results, cmdenv, tdb):
                 routes = routes[:1]
                 break
 
-        if cmdenv.loop:
-            for route in routes:
-                if route.lastStation == route.firstStation:
-                    pickedRoutes.append(route)
-        elif cmdenv.shorten:
-            dest = cmdenv.destPlace
-            for route in routes:
-                lastStn = route.lastStation
-                if lastStn is dest or lastStn.system is dest:
-                    pickedRoutes.append(route)
+        if routePickPred:
+            pickedRoutes.extend(
+                route for route in routes if routePickPred(route)
+            )
 
-    if cmdenv.loop:
+    if cmdenv.loop or cmdenv.shorten:
+        cmdenv.DEBUG0("Using {} picked routes", len(pickedRoutes))
         routes = pickedRoutes
         # normalise the scores for fairness...
         for route in routes:
+            cmdenv.DEBUG0(
+                "{} hops, {} score, {} gpt",
+                len(route.hops), route.score, route.gpt
+            )
             route.score /= len(route.hops)
-    elif cmdenv.shorten:
-        cmdenv.DEBUG0("Picking from {} shortened routes", len(pickedRoutes))
-        routes = pickedRoutes
-        for route in routes:
-            cmdenv.DEBUG0("{} hops / {} gpt", len(route.hops), route.gpt)
-            route.score = route.gpt
 
     if not routes:
         raise NoDataError(
