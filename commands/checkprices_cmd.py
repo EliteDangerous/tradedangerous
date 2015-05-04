@@ -90,34 +90,34 @@ def run(results, cmdenv, tdb):
 
     # check if the stations pays more than it's asking
     for (stationID, itemID, sell, buy) in checkCursor.execute("""
-                             SELECT vPrice.station_id, vPrice.item_id,
-                                    vPrice.sell_to, vPrice.buy_from
-                               FROM vPrice
-                              WHERE vPrice.sell_to > vPrice.buy_from
-                                AND vPrice.buy_from > 0
+                             SELECT si.station_id, si.item_id,
+                                    si.demand_price, si.supply_price
+                               FROM StationItem AS si
+                              WHERE si.demand_price > si.supply_price
+                                AND si.supply_price > 0
                         """):
         cmdenv.DEBUG0("sell > buy: {:>7n} > {:>7n}".format(sell, buy))
         tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # check if sell = buy = stock
     for (stationID, itemID, sell, buy) in checkCursor.execute("""
-                             SELECT vPrice.station_id, vPrice.item_id,
-                                    vPrice.sell_to, vPrice.buy_from
-                               FROM vPrice
-                              WHERE vPrice.sell_to > 0
-                                AND vPrice.sell_to = vPrice.buy_from
-                                AND vPrice.buy_from = vPrice.stock
+                             SELECT si.station_id, si.item_id,
+                                    si.demand_price, si.supply_price
+                               FROM StationItem AS si
+                              WHERE si.demand_price > 0
+                                AND si.demand_price = si.supply_price
+                                AND si.supply_price = si.supply_units
                         """):
         cmdenv.DEBUG0("sell = buy = stock: {:>7n} = {:>7n}".format(sell, buy))
         tempCursor.execute(stmtInsert, [stationID, itemID])
 
     # check if buy > sell * (10/7)
     for (stationID, itemID, sell, buy) in checkCursor.execute("""
-                             SELECT vPrice.station_id, vPrice.item_id,
-                                    vPrice.sell_to, vPrice.buy_from
-                               FROM vPrice
-                              WHERE vPrice.buy_from > round(vPrice.sell_to*10.0/7)
-                                AND vPrice.sell_to > {}
+                             SELECT si.station_id, si.item_id,
+                                    si.demand_price, si.supply_price
+                               FROM StationItem AS si
+                              WHERE si.supply_price > round(si.demand_price*10.0/7)
+                                AND si.demand_price > {}
                         """.format("-1" if cmdenv.detail > 1 else "0")):
         cmdenv.DEBUG0("buy > sell * (10/7): {:>7n} > {:>7n}".format(buy, int(sell*4/3)))
         tempCursor.execute(stmtInsert, [stationID, itemID])
@@ -178,17 +178,15 @@ def run(results, cmdenv, tdb):
     # sql statement for the result list
     sqlStmt = """
                  SELECT DISTINCT Station.station_id, Item.item_id,
-                                 IFNULL(sb.price, 0) AS sell_to,
-                                 IFNULL(ss.price, 0) AS buy_from
+                                 IFNULL(si.demand_price, 0) AS demand_price,
+                                 IFNULL(si.supply_price, 0) AS supply_price
                    FROM tmp_result AS t
                         INNER JOIN Item    USING(item_id)
                         INNER JOIN Category ON Category.category_id = Item.category_id
                         INNER JOIN Station USING(station_id)
                         INNER JOIN System ON System.system_id = Station.system_id
-                        LEFT OUTER JOIN StationBuying AS sb
+                        LEFT OUTER JOIN StationItem AS si
                              USING (item_id, station_id)
-                        LEFT OUTER JOIN StationSelling AS ss
-                             USING (station_id, item_id)
                   ORDER BY System.name, Station.name, Category.name, Item.name
               """
 
@@ -234,9 +232,9 @@ def render(results, cmdenv, tdb):
             key=lambda row: itemByID[row['item_id']].dbname)
 
         itemRowFmt.addColumn('Sell Cr', '>', 7, 'n',
-            key=lambda row: row['sell_to'])
+            key=lambda row: row['demand_price'])
         itemRowFmt.addColumn('Buy Cr', '>', 7, 'n',
-            key=lambda row: row['buy_from'])
+            key=lambda row: row['supply_price'])
 
         if not cmdenv.quiet:
             heading, underline = itemRowFmt.heading()
