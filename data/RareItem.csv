@@ -1,6 +1,7 @@
 !name@System.system_id,name@Station.station_id,unq:name,cost,max_allocation,illegal
 'DEA MOTRONA','Pinzon Dock','Motrona Experience Jelly',7420,10,'Y'
 'DISO','Shifnalport','Diso Ma Corn',335,15,'N'
+'ERANIN','AZEBAN CITY','Eranin Pearl Whisky',1620,8,'Y'
 'HELVETITJ','Friend Orbital','Helvetitj Pearls',3620,6,'N'
 'KORRO KUNG','Lonchakov Orbital','Koro Kung Pellets',240,20,'N'
 'LEESTI','George Lucas','Azure Milk',4123,7,'N'
