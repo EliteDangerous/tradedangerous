@@ -342,6 +342,8 @@ unq:!name@System.system_id,unq:name@Station.station_id,unq:name@Ship.ship_id,mod
 'LHS 3006','Leonard Nimoy Station','Adder','2015-03-15 13:37:16'
 'LHS 3006','Leonard Nimoy Station','Cobra','2015-03-15 13:37:16'
 'LHS 3006','Leonard Nimoy Station','Sidewinder','2015-03-15 13:37:16'
+'LP 131-66','Vasilyev Vision','Asp','2015-05-09 09:31:06'
+'LP 131-66','Vasilyev Vision','Sidewinder','2015-05-09 09:31:03'
 'LP 377-78','Gaspar de Lemos Port','Adder','2015-04-11 12:54:48'
 'LP 377-78','Gaspar de Lemos Port','Cobra','2015-04-11 12:54:52'
 'LP 377-78','Gaspar de Lemos Port','Eagle','2015-04-11 12:55:08'
