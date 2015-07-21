@@ -122,6 +122,8 @@ ignore = [
     "HYADES SECTOR MS-X B4-4",
     "UCAC3 70-2386",
     "HYADES KX-T C3-24",
+    "ICZ ZF-O B2-6",
+    "ZELAND",
 ]
 
 
@@ -160,12 +162,28 @@ def parse_arguments():
             type=int,
             default=2,
     )
+    grp = parser.add_mutually_exclusive_group()
+    if grp: # for indentation
+        grp.add_argument(
+                '--random',
+                action='store_true',
+                required=False,
+                help='Show systems in random order, maximum of --max-systems.',
+        )
+        grp.add_argument(
+                '--distance',
+                action='store_true',
+                required=False,
+                help='Select upto 10 systems by proximity.',
+        )
     parser.add_argument(
-            '--random',
-            action='store_true',
+            '--max-systems',
+            dest='maxSystems',
+            help='Maximum systems to query with --random/--distance.',
             required=False,
-            help='Show systems in random order, maximum of 10.',
-    )
+            type=int,
+            default=10
+        )
     parser.add_argument(
             '--add-to-local-db', '-A',
             action='store_true',
@@ -217,6 +235,13 @@ def parse_arguments():
             required=False,
             action='count',
     )
+    parser.add_argument(
+            '--ref',
+            help='Reference system (for --distance).',
+            default=None,
+            dest='refSys',
+            type=str,
+    )
 
     argv = parser.parse_args(sys.argv[1:])
     dateRe = re.compile(r'^20\d\d-(0\d|1[012])-([012]\d|3[01]) ([01]\d|2[0123]):[0-5]\d:[0-5]\d$')
@@ -236,6 +261,8 @@ def parse_arguments():
                 "Invalid date: '{}', expecting YYYY-MM-DD HH:MM:SS format."
                 .format(argv.date)
         )
+    if not argv.distance and argv.refSys:
+        raise UsageError("--ref requires --distance")
 
     return argv
 
@@ -300,7 +327,7 @@ def get_distance(tdb, startSys, x, y, z):
     return float("{:.2f}".format(distance))
 
 
-def submit_distance(argv, name, distance):
+def submit_distance(argv, name, distance, refSys=None, refDist=None):
     p0 = name.upper()
     ref = argv.startSys.name().upper()
     print("Sending: {}->{}: {}ly by {}".format(
@@ -312,6 +339,12 @@ def submit_distance(argv, name, distance):
         commander=argv.cmdr,
         test=argv.test,
     )
+    if refSys and refDist:
+        if isinstance(refSys, tradedb.System):
+            refName = refSys.name()
+        else:
+            refName = refSys
+        sub.add_distance(refName, refDist)
     r = sub.submit()
     result = misc.edsc.StarSubmissionResult(
         star=name.upper(),
@@ -384,9 +417,33 @@ def main():
     if argv.summary or len(systems) <= 0:
         return
 
+    systems = [
+        sysinfo for sysinfo in systems if 'coord' in sysinfo
+    ]
+
     if argv.random:
-        num = min(len(systems), 10)
+        num = min(len(systems), argv.maxSystems)
         systems = random.sample(systems, num)
+
+    if argv.refSys:
+        refSys = tdb.lookupPlace(argv.refSys)
+    else:
+        refSys = None
+    startSys = argv.startSys
+    for sysinfo in systems:
+        x, y, z = sysinfo['coord']
+        sysinfo['distance'] = get_distance(tdb, startSys, x, y, z)
+        if refSys:
+            sysinfo['refdist'] = get_distance(tdb, refSys, x, y, z)
+        else:
+            sysinfo['refdist'] = None
+
+    if argv.distance:
+        if refSys:
+            systems.sort(key=lambda sysinfo: sysinfo['refdist'])
+        else:
+            systems.sort(key=lambda sysinfo: sysinfo['distance'])
+        systems = systems[:argv.maxSystems]
 
     if argv.splash:
         print(
@@ -459,15 +516,20 @@ def main():
                     upts=sysinfo.get('updatedate', ''),
                 )
             )
+            if refSys:
+                print("{reflab:.<12}: {refdist}ly\n".format(
+                    reflab="Ref Dist",
+                    refdist=sysinfo['refdist'],
+                ))
 
             check_database(tdb, name, x, y, z)
 
             change = has_position_changed(sysinfo['place'], name, x, y, z)
             if change:
-                oldDist = argv.startSys.distanceTo(sysinfo['place'])
+                oldDist = startSys.distanceTo(sysinfo['place'])
                 print("Old Distance: {:.2f}ly".format(oldDist))
 
-            distance = get_distance(tdb, argv.startSys, x, y, z)
+            distance = sysinfo['distance']
             clip.copy_text(name)
             prompt = "{}/{}: '{}': {:.2f}ly? ".format(
                 current, total,
