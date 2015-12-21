@@ -21,7 +21,7 @@ import sys
 import textwrap
 import time
 
-__version_info__ = ('3', '6', '0')
+__version_info__ = ('3', '6', '1')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -64,8 +64,6 @@ ship_names = {
     'Viper_MkIV': 'Viper MkIV',
     'Vulture': 'Vulture',
 }
-
-# EDDN names ships as they appear in game.
 
 eddn_ship_names = {
     'Adder': 'Adder',
@@ -3886,6 +3884,9 @@ class ImportPlugin(plugins.ImportPluginBase):
             except:
                 print("That doesn't seem to be a number. Defaulting to zero.")
                 lsFromStar = 0
+            planetary = input(
+                "Planetary station (Y, N or enter for ?): "
+            ) or '?'
             blackMarket = input(
                 "Black market present (Y, N or enter for ?): "
             ) or '?'
@@ -3930,7 +3931,8 @@ class ImportPlugin(plugins.ImportPluginBase):
                 outfitting=outfitting,
                 rearm=rearm,
                 refuel=refuel,
-                repair=repair
+                repair=repair,
+                planetary=planetary
             ):
                 lines, csvPath = csvexport.exportTableToFile(
                     tdb,
@@ -3951,12 +3953,18 @@ class ImportPlugin(plugins.ImportPluginBase):
             rearm = station_lookup.rearm
             refuel = station_lookup.refuel
             repair = station_lookup.repair
+            planetary = station_lookup.planetary
 
             if lsFromStar == 0:
                 lsFromStar = input(
                     "Update distance from star (enter for 0): "
                 ) or 0
                 lsFromStar = int(lsFromStar)
+
+            if planetary is '?':
+                planetary = input(
+                    "Update planetary (Y, N or enter for ?): "
+                ) or '?'
 
             if blackMarket is '?':
                 blackMarket = input(
@@ -4015,7 +4023,8 @@ class ImportPlugin(plugins.ImportPluginBase):
                 outfitting != station_lookup.outfitting or
                 rearm != station_lookup.rearm or
                 refuel != station_lookup.refuel or
-                repair != station_lookup.repair
+                repair != station_lookup.repair or
+                planetary != station_lookup.planetary
             ):
                 if tdb.updateLocalStation(
                     station=station_lookup,
@@ -4027,7 +4036,8 @@ class ImportPlugin(plugins.ImportPluginBase):
                     outfitting=outfitting,
                     rearm=rearm,
                     refuel=refuel,
-                    repair=repair
+                    repair=repair,
+                    planetary=planetary
                 ):
                     lines, csvPath = csvexport.exportTableToFile(
                         tdb,
