@@ -1,3 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
 __pycache__
 import.txt
 tmp
@@ -12,6 +15,7 @@ data/*.ini
 data/extra-stars.txt
 data/*.txt
 data/edapi.cookies
+data/StationItem.csv
 
 *.prices
 *.suo
@@ -20,9 +24,15 @@ misc/*.csv
 *.orig
 *.prev
 *.last
+Flight Log.csv
 
 wip/
 pycallgraph.png
 /config.sh
 venv/
 .venv/
+
+Diamondback*.txt
+Adder*.txt
+Cobra*.txt
+result.txt
