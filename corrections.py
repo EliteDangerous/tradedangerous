@@ -23,6 +23,9 @@ categories = {
 }
 
 items = {
+    'META ALLOYS': 'Meta-Alloys',
+    'MU TOM IMAGER': 'Muon Imager',
+    'SKIMER COMPONENTS': 'Skimmer Components',
 }
 
 def correctSystem(oldName):
