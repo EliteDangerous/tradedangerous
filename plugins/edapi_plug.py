@@ -3906,19 +3906,21 @@ class ImportPlugin(plugins.ImportPluginBase):
                 "Repair present (Y, N or enter for ?): "
             ) or '?'
             # This is unreliable, so ask the user.
-            if 'commodities' in api.profile['lastStarport']:
-                market = 'Y'
-            else:
-                market = input(
-                    "Commodity market present (Y, N or enter for ?): "
-                ) or '?'
+            # Do not use lastStarport
+            # if 'commodities' in api.profile['lastStarport']:
+            #    market = 'Y'
+            # else:
+            market = input(
+                "Commodity market present (Y, N or enter for ?): "
+            ) or '?'
             # This is also unreliable, so ask the user.
-            if 'ships' in api.profile['lastStarport']:
-                shipyard = 'Y'
-            else:
-                shipyard = input(
-                    "Shipyard present (Y, N or enter for ?): "
-                ) or '?'
+            # Do not use lastStarport
+            # if 'ships' in api.profile['lastStarport']:
+            #     shipyard = 'Y'
+            # else:
+            shipyard = input(
+                "Shipyard present (Y, N or enter for ?): "
+            ) or '?'
             system_lookup = tdb.lookupSystem(system)
             if tdb.addLocalStation(
                 system=system_lookup,
@@ -3997,22 +3999,24 @@ class ImportPlugin(plugins.ImportPluginBase):
                 ) or '?'
 
             # This is unreliable, so ask the user if unknown.
-            if 'commodities' in api.profile['lastStarport']:
-                market = 'Y'
-            else:
-                if market is '?':
-                    market = input(
-                        "Commodity market present (Y, N or enter for ?): "
-                    ) or '?'
+            # Do not use lastStarport
+            # if 'commodities' in api.profile['lastStarport']:
+            #     market = 'Y'
+            # else:
+            if market is '?':
+                market = input(
+                    "Commodity market present (Y, N or enter for ?): "
+                ) or '?'
 
             # This is also unreliable, so ask the user if unknown.
-            if 'ships' in api.profile['lastStarport']:
-                shipyard = 'Y'
-            else:
-                if shipyard is '?':
-                    shipyard = input(
-                        "Shipyard present (Y, N or enter for ?): "
-                    ) or '?'
+            # Do not use lastStarport
+            # if 'ships' in api.profile['lastStarport']:
+            #     shipyard = 'Y'
+            # else:
+            if shipyard is '?':
+                shipyard = input(
+                    "Shipyard present (Y, N or enter for ?): "
+                ) or '?'
 
             if (
                 lsFromStar != station_lookup.lsFromStar or
@@ -4048,36 +4052,37 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # If a shipyard exists, update the ship vendor list.
         eddn_ships = []
-        if 'ships' in api.profile['lastStarport']:
-            ships = list(
-                api.profile['lastStarport']['ships']['shipyard_list'].keys()
-            )
-            for ship in api.profile['lastStarport']['ships']['unavailable_list']:  # NOQA
-                ships.append(ship['name'])
-
-            for ship in ships:
-                    eddn_ships.append(eddn_ship_names[ship])
-
-            if self.getOption("csvs"):
-                db = tdb.getDB()
-                for ship in ships:
-                    ship_lookup = tdb.lookupShip(ship_names[ship])
-                    db.execute(
-                        """
-                        REPLACE INTO ShipVendor
-                        (ship_id, station_id)
-                        VALUES
-                        (?, ?)
-                        """,
-                        [ship_lookup.ID, station_lookup.ID]
-                    )
-                    db.commit()
-                tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), place)
-                lines, csvPath = csvexport.exportTableToFile(
-                    tdb,
-                    tdenv,
-                    "ShipVendor",
+        if shipyard is 'Y':
+            if 'ships' in api.profile['lastStarport']:
+                ships = list(
+                    api.profile['lastStarport']['ships']['shipyard_list'].keys()
                 )
+                for ship in api.profile['lastStarport']['ships']['unavailable_list']:  # NOQA
+                    ships.append(ship['name'])
+
+                for ship in ships:
+                        eddn_ships.append(eddn_ship_names[ship])
+
+                if self.getOption("csvs"):
+                    db = tdb.getDB()
+                    for ship in ships:
+                        ship_lookup = tdb.lookupShip(ship_names[ship])
+                        db.execute(
+                            """
+                            REPLACE INTO ShipVendor
+                            (ship_id, station_id)
+                            VALUES
+                            (?, ?)
+                            """,
+                            [ship_lookup.ID, station_lookup.ID]
+                        )
+                        db.commit()
+                    tdenv.NOTE("Updated {} ships in {} shipyard.", len(ships), place)
+                    lines, csvPath = csvexport.exportTableToFile(
+                        tdb,
+                        tdenv,
+                        "ShipVendor",
+                    )
 
         # Some sanity checking on the market.
         if 'commodities' not in api.profile['lastStarport']:
