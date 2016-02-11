@@ -3867,10 +3867,19 @@ class ImportPlugin(plugins.ImportPluginBase):
         # Check to see if this system is in the Stations file
         try:
             station_lookup = tdb.lookupPlace(place)
+            # placed here because print() can't print a 'None' type
+            print('StnLs=', station_lookup.lsFromStar,
+                ' Mkt=', station_lookup.market,
+                ' BMk=', station_lookup.blackMarket,
+                ' Shp=', station_lookup.shipyard,
+                ' Out=', station_lookup.outfitting,
+                ' Arm=', station_lookup.rearm,
+                ' Ref=', station_lookup.refuel,
+                ' Rep=', station_lookup.repair,
+                ' Pad=', station_lookup.maxPadSize, '\n',
+                ' Plt=', station_lookup.planetary)
         except LookupError:
             station_lookup = None
-
-        print(station_lookup)
 
         # The station isn't known. Add it.
         if not station_lookup:
