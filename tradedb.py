@@ -294,14 +294,14 @@ class Station(object):
     __slots__ = (
         'ID', 'system', 'dbname',
         'lsFromStar', 'market', 'blackMarket', 'shipyard', 'maxPadSize',
-        'outfitting', 'rearm', 'refuel', 'repair',
+        'outfitting', 'rearm', 'refuel', 'repair', 'planetary',
         'itemCount', 'dataAge',
     )
 
     def __init__(
             self, ID, system, dbname,
             lsFromStar, market, blackMarket, shipyard, maxPadSize,
-            outfitting, rearm, refuel, repair,
+            outfitting, rearm, refuel, repair, planetary,
             itemCount=0, dataAge=None,
             ):
         self.ID, self.system, self.dbname = ID, system, dbname
@@ -314,6 +314,7 @@ class Station(object):
         self.rearm = rearm
         self.refuel = refuel
         self.repair = repair
+        self.planetary = planetary
         self.itemCount = itemCount
         self.dataAge = dataAge
         system.stations = system.stations + (self,)
@@ -1153,7 +1154,7 @@ class TradeDB(object):
         stmt = """
             SELECT  station_id, system_id, name,
                     ls_from_star, market, blackmarket, shipyard,
-                    max_pad_size, outfitting, rearm, refuel, repair
+                    max_pad_size, outfitting, rearm, refuel, repair, planetary
               FROM  Station
         """
         self.cur.execute(stmt)
@@ -1163,12 +1164,12 @@ class TradeDB(object):
         for (
             ID, systemID, name,
             lsFromStar, market, blackMarket, shipyard,
-            maxPadSize, outfitting, rearm, refuel, repair,
+            maxPadSize, outfitting, rearm, refuel, repair, planetary,
         ) in self.cur:
             station = Station(
                 ID, systemByID[systemID], name,
                 lsFromStar, market, blackMarket, shipyard,
-                maxPadSize, outfitting, rearm, refuel, repair,
+                maxPadSize, outfitting, rearm, refuel, repair, planetary,
                 0, None,
             )
             stationByID[ID] = station
@@ -1206,6 +1207,7 @@ class TradeDB(object):
             rearm,
             refuel,
             repair,
+            planetary,
             modified='now',
             commit=True,
             ):
@@ -1221,6 +1223,7 @@ class TradeDB(object):
         rearm = rearm.upper()
         refuel = refuel.upper()
         repair = repair.upper()
+        planetary = planetary.upper()
         assert market in "?YN"
         assert blackMarket in "?YN"
         assert shipyard in "?YN"
@@ -1229,6 +1232,7 @@ class TradeDB(object):
         assert rearm in "?YN"
         assert refuel in "?YN"
         assert repair in "?YN"
+        assert planetary in '?YN'
 
         db = self.getDB()
         cur = db.cursor()
@@ -1236,18 +1240,18 @@ class TradeDB(object):
             INSERT INTO Station (
                 name, system_id,
                 ls_from_star, market, blackmarket, shipyard, max_pad_size,
-                outfitting, rearm, refuel, repair,
+                outfitting, rearm, refuel, repair, planetary,
                 modified
             ) VALUES (
                 ?, ?,
                 ?, ?, ?, ?, ?,
-                ?, ?, ?, ?,
+                ?, ?, ?, ?, ?,
                 DATETIME(?)
             )
         """, [
             name, system.ID,
             lsFromStar, market, blackMarket, shipyard, maxPadSize,
-            outfitting, rearm, refuel, repair,
+            outfitting, rearm, refuel, repair, planetary,
             modified,
         ])
         ID = cur.lastrowid
@@ -1262,6 +1266,7 @@ class TradeDB(object):
             rearm=rearm,
             refuel=refuel,
             repair=repair,
+            planetary=planetary,
             itemCount=0, dataAge=0,
         )
         self.stationByID[ID] = station
@@ -1270,12 +1275,12 @@ class TradeDB(object):
         self.tdenv.NOTE(
             "{} (#{}) added to {}: "
             "ls={}, mkt={}, bm={}, yard={}, pad={}, "
-            "out={}, arm={}, ref={}, rep={}, "
+            "out={}, arm={}, ref={}, rep={}, plt={}, "
             "mod={}",
             station.name(), station.ID,
             self.dbPath if self.tdenv.detail > 1 else "local db",
             lsFromStar, market, blackMarket, shipyard, maxPadSize,
-            outfitting, rearm, refuel, repair,
+            outfitting, rearm, refuel, repair, planetary,
             modified,
         )
         return station
@@ -1293,6 +1298,7 @@ class TradeDB(object):
             rearm=None,
             refuel=None,
             repair=None,
+            planetary=None,
             modified='now',
             force=False,
             commit=True,
@@ -1336,6 +1342,7 @@ class TradeDB(object):
         _check_setting("arm", "rearm", rearm, TradeDB.marketStates)
         _check_setting("ref", "refuel", refuel, TradeDB.marketStates)
         _check_setting("rep", "repair", repair, TradeDB.marketStates)
+        _check_setting("plt", "planetary", planetary, TradeDB.marketStates)
 
         if not changes:
             return False
@@ -1353,6 +1360,7 @@ class TradeDB(object):
                    rearm=?,
                    refuel=?,
                    repair=?,
+                   planetary=?,
                    modified=DATETIME(?)
              WHERE station_id = ?
         """, [
@@ -1366,6 +1374,7 @@ class TradeDB(object):
             station.rearm,
             station.refuel,
             station.repair,
+            station.planetary,
             modified,
             station.ID
         ])
@@ -1653,6 +1662,7 @@ class TradeDB(object):
             avoidPlaces=None,
             maxPadSize=None,
             maxLsFromStar=0,
+            noPlanet=False,
             ):
         """
         Gets a list of the Station destinations that can be reached
@@ -1734,6 +1744,11 @@ class TradeDB(object):
                         yield node, station
 
         path_iter = iter(path_iter_fn())
+        if noPlanet:
+            path_iter = iter(
+                (node, station) for (node, station) in path_iter
+                if station.planetary == 'N'
+            )
         if avoidPlaces:
             path_iter = iter(
                 (node, station) for (node, station) in path_iter

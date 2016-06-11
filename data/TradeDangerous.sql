@@ -134,6 +134,8 @@ CREATE TABLE Station
           CHECK (refuel IN ('?', 'Y', 'N')),
    repair TEXT(1) NOT NULL DEFAULT '?'
           CHECK (repair IN ('?', 'Y', 'N')),
+   planetary  TEXT(1) NOT NULL DEFAULT '?'
+       CHECK (planetary  IN ('?', 'Y', 'N')),
    modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
    UNIQUE (system_id, name),

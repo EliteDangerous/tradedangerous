@@ -313,6 +313,8 @@ class Route(object):
                     details.append('BMk:'+station.blackMarket)
                 if station.maxPadSize != '?':
                     details.append('Pad:'+station.maxPadSize)
+                if station.planetary != '?':
+                    details.append('Plt:'+station.planetary)
                 if station.shipyard != '?':
                     details.append('Shp:'+station.shipyard)
                 if station.outfitting != '?':
@@ -526,7 +528,7 @@ class TradeCalc(object):
         cur = db.execute(stmt, binds)
         now = int(time.time())
         for (stnID, itmID,
-                timestamp, 
+                timestamp,
                 dmdCr, dmdUnits, dmdLevel,
                 supCr, supUnits, supLevel) in cur:
             if stnID != lastStnID:
@@ -756,6 +758,7 @@ class TradeCalc(object):
         maxJumpsPer = tdenv.maxJumpsPer
         maxLyPer = tdenv.maxLyPer
         maxPadSize = tdenv.padSize
+        noPlanet = tdenv.noPlanet
         maxLsFromStar = tdenv.maxLs or float('inf')
         reqBlackMarket = getattr(tdenv, 'blackMarket', False) or False
         maxAge = getattr(tdenv, 'maxAge') or 0
@@ -817,6 +820,7 @@ class TradeCalc(object):
                     avoidPlaces=avoidPlaces,
                     maxPadSize=maxPadSize,
                     maxLsFromStar=maxLsFromStar,
+                    noPlanet=noPlanet,
                 )
 
         prog = pbar.Progress(len(routes), 25)
