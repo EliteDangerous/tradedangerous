@@ -977,7 +977,7 @@ def processImportFile(tdenv, db, importPath, tableName):
             )
         # now we can make the sql statement
         sql_stmt = """
-            INSERT INTO {table} ({columns}) VALUES({values})
+            INSERT OR IGNORE INTO {table} ({columns}) VALUES({values})
         """.format(
                 table=tableName,
                 columns=','.join(bindColumns),
@@ -1032,6 +1032,10 @@ def processImportFile(tdenv, db, importPath, tableName):
                     uniqueIndex[key] = lineNo
 
                 try:
+                    if tableName == "System":
+                        for idx, col in enumerate(bindColumns):
+                            if col == "name":
+                                linein[idx] = linein[idx].upper()
                     db.execute(sql_stmt, linein)
                 except Exception as e:
                     raise SystemExit(
