@@ -2,6 +2,10 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
+Jun 28 2016 (bgol, horizon branch):
+. (maddavo) Renamed item "Low Temperature Diamond" to "Low Temperature Diamonds"
+. added EDSM utils (implemented issue #1)
+
 v7.4.0 Jan 27 2016
 . Merged Tyler Lund's support for posting data to EDDN from edapi.
 . (kfsone) Merged Maddavo data.
@@ -235,7 +239,7 @@ v6.15.0 Mar 27 2015
    - System, Item and Station deletions can be very slow if there are prices
      in the database, be patient,
    - "--opt=csvs" now also enables "exportcsvs"
-   - "--opt=exportcsvs" not exports 
+   - "--opt=exportcsvs" not exports
 + Over 100 additional Systems
 API:
 . (kfsone) transfers.CSVStream will give a line-by-line report of utf-8
