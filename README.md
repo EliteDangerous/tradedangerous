@@ -25,7 +25,7 @@ You're in a ship with 8 cargo spaces that can make 8.56 ly per jump; you're will
 
 If we ran this, TD would search the galaxy for trade runs. But it could take us days to reach some of them. So lets say we're currently at Kummer City in the Andere system.
 
-    trade.py run --from "andere/kummer city" 
+    trade.py run --from "andere/kummer city"
         --credits 5000 --capacity 8 --ly-per 8.56 --jumps 2 --hops 2
 
 (The above represents a single line)
@@ -121,7 +121,7 @@ There's a lot going on here:
     . Fine detail about stations (distance from star, has black market, etc),
     . "score" tells us how TD ranked this based on factors such as total gain, supercruise distances, number of jumps, etc,
     . Expected purchase/sale costs and rough data age (some crowd-sourced data can appear to be very old if it hasn't changed),
-    . How much we expect to gain each hop and the cr/ton we make, 
+    . How much we expect to gain each hop and the cr/ton we make,
 
 Most users tend to use the in-game route planner and prefer the cleaner "--summary" presentation:
 
@@ -438,6 +438,9 @@ For additional help on a specific command, such as 'update' use
          -p ML?               (medium, large, or unknown only)
          --pad ?              (unknown only)
          --pad L              (large only, ignores unknown)
+
+     --no-planet
+       Require stations to be in space.
 
      --black-market
      --bm
@@ -760,14 +763,14 @@ To take maximum advantage of Maddavo's services, you should consider using "-O c
 
 ##Elite Dangerous Mobile API import plugin:
 
-Frontier provides an API for their mobile app. This can be used to report accurate information about your currently docked station such as market prices, shipyard, and other station information. The "edapi" plugin provides a way to accurately import this information into your prices file and optionally report the market prices to EDDN. 
+Frontier provides an API for their mobile app. This can be used to report accurate information about your currently docked station such as market prices, shipyard, and other station information. The "edapi" plugin provides a way to accurately import this information into your prices file and optionally report the market prices to EDDN.
 
 ###Basic usage:
 
     trade.py import --plug edapi
       This will query the API for information abotu your currently docked
       station and import any market prices and shipyard information
-      available. You will be prompted to enter any missing station information. 
+      available. You will be prompted to enter any missing station information.
 
     trade.py imp -P edapi -O eddn
       This will do the same thing, but also post your market, shipyard, and
@@ -831,7 +834,7 @@ Lists items bought / sold at a given station; with --detail (-v) also includes t
 
 Provides details of routes without worrying about trade. By default, if given a ship, it uses the maximum dry range of the ship. Use `--full` if you want to restrict to routes with a full cargo hold.
 
-    trade.py nav [-q | -v] [--ly-per] from to [--avoid] [--stations]
+    trade.py nav [-q | -v] [--ly-per] from to [--avoid] [--stations] [--no-planet]
 
 ###Options:
 
@@ -843,7 +846,11 @@ Provides details of routes without worrying about trade. By default, if given a 
       Produces a route that does not fly through place. If place is a
       station, the system it is in will be avoided.
 
+    --via PLACE[,PLACE,...]
+      Require specified systems/stations to be en-route (in order).
+
     --stations
+    -S
       Lists stations at each stop
 
     --refuel-jumps N
@@ -861,6 +868,9 @@ Provides details of routes without worrying about trade. By default, if given a 
       e.g.
         --pad-size=ML
         -p ?SL           (unknown, small or large)
+
+    --no-planet
+      Require stations to be in space.
 
     from
       Name of the starting system or a station in the system,
@@ -916,6 +926,9 @@ Provides details of local stations without worrying about trade. By default, if 
         -p ML?               (medium, large, or unknown only)
         --pad ?              (unknown only)
         --pad L              (large only, ignores unknown)
+
+    --no-planet
+      Require stations to be in space.
 
     --stations
       Limit results to systems which have stations
@@ -1041,7 +1054,7 @@ Finds stations that are selling / where you can buy, a named list of items or sh
         [-q | -v] [--supply N] [-P | -S] [--limit]
         [--near N] [--ly-per N] [--avoid PLACES]
         [--pad-size PSML?] [--black-market | --bm]
-        [--one-stop | -1]
+        [--one-stop | -1] [--no-planet]
         category|item [category|item category|item,category|item,category|item …]
         ship [ship ship,ship …]
 
@@ -1071,6 +1084,9 @@ Finds stations that are selling / where you can buy, a named list of items or sh
       e.g.
         --avoid sol --avoid ross154 --avoid abrahamlincoln,marshigh
 
+    --no-planet
+      Require stations to be in space.
+
     --black-market
     --bm
       Only consider stations known to have a black market.
@@ -1097,7 +1113,7 @@ Finds stations that are selling / where you can buy, a named list of items or sh
         --gt 100
         --lt 1.2k
 
-    --prices-sort
+    --price-sort
     -P
       Keeps items sorted by price when using --near
      (otherwise items are listed by distance and then price)
@@ -1123,6 +1139,7 @@ Looks for stations buying the specified item.
         [-q | -v] [--demand N] [-P] [--limit]
         [--near N] [--ly-per N] [--avoid PLACES]
         [--pad-size PSML?] [--black-market | --bm]
+        [--no-planet] [--lt N] [--gt N] [--price-sort | -P]
         item
 
 ###Options:
@@ -1165,6 +1182,9 @@ Looks for stations buying the specified item.
         --pad ?              (unknown only)
         --pad L              (large only, ignores unknown)
 
+    --no-planet
+      Require stations to be in space.
+
     --lt credits
     --gt credits
       Specify min (gt) and max (lt) credit prices for items
@@ -1172,7 +1192,7 @@ Looks for stations buying the specified item.
         --gt 100
         --lt 1.2k
 
-    --prices-sort
+    --price-sort
     -P
       Keeps items sorted by price when using --near
       (otherwise items are listed by distance and then price)
@@ -1275,6 +1295,9 @@ This command looks for known rare items within the space around a specified syst
         -o ML?               (medium, large, or unknown only)
         --pad ?              (unknown only)
         --pad L              (large only, ignores unknown)
+
+     --no-planet
+       Require stations to be in space.
 
      --legal
      --illegal
