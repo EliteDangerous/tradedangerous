@@ -26,6 +26,8 @@ items = {
     'META ALLOYS': 'Meta-Alloys',
     'MU TOM IMAGER': 'Muon Imager',
     'SKIMER COMPONENTS': 'Skimmer Components',
+	'POWER TRANSFER CONDUITS': 'Power Transfer Bus',
+	'LOW TEMPERATURE DIAMOND': 'Low Temperature Diamonds'
 }
 
 def correctSystem(oldName):
