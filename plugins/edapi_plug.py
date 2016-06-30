@@ -3906,9 +3906,6 @@ class ImportPlugin(plugins.ImportPluginBase):
             except:
                 print("That doesn't seem to be a number. Defaulting to zero.")
                 lsFromStar = 0
-            planetary = input(
-                "Planetary station (Y, N or enter for ?): "
-            ) or '?'
             blackMarket = input(
                 "Black market present (Y, N or enter for ?): "
             ) or '?'
@@ -3926,6 +3923,9 @@ class ImportPlugin(plugins.ImportPluginBase):
             ) or '?'
             repair = input(
                 "Repair present (Y, N or enter for ?): "
+            ) or '?'
+            planetary = input(
+                "Planetary station (Y, N or enter for ?): "
             ) or '?'
             # This is unreliable, so ask the user.
             # Do not use lastStarport
@@ -3985,11 +3985,6 @@ class ImportPlugin(plugins.ImportPluginBase):
                 ) or 0
                 lsFromStar = int(lsFromStar)
 
-            if planetary is '?':
-                planetary = input(
-                    "Update planetary (Y, N or enter for ?): "
-                ) or '?'
-
             if blackMarket is '?':
                 blackMarket = input(
                     "Update black market present (Y, N or enter for ?): "
@@ -4018,6 +4013,11 @@ class ImportPlugin(plugins.ImportPluginBase):
             if repair is '?':
                 repair = input(
                     "Update repair present (Y, N or enter for ?): "
+                ) or '?'
+
+            if planetary is '?':
+                planetary = input(
+                    "Update planetary (Y, N or enter for ?): "
                 ) or '?'
 
             # This is unreliable, so ask the user if unknown.
