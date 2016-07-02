@@ -588,6 +588,8 @@ class TradeDB(object):
         ('Category.csv', 'Category'),
         ('Item.csv', 'Item'),
         ('RareItem.csv', 'RareItem'),
+        ('FDevShipyard.csv', 'FDevShipyard'),
+        ('FDevOutfitting.csv', 'FDevOutfitting'),
     )
 
     # Translation matrixes for attributes -> common presentation

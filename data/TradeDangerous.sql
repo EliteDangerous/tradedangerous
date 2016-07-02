@@ -171,6 +171,7 @@ CREATE TABLE Ship
    ship_id INTEGER PRIMARY KEY AUTOINCREMENT,
    name VARCHAR(40) COLLATE nocase,
    cost INTEGER NOT NULL,
+   fdev_id INTEGER,
 
    UNIQUE (name)
  );
@@ -255,6 +256,8 @@ CREATE TABLE Item
    name VARCHAR(40) COLLATE nocase,
    category_id INTEGER NOT NULL,
    ui_order INTEGER NOT NULL DEFAULT 0,
+   avg_price INTEGER,
+   fdev_id INTEGER,
 
    UNIQUE (category_id, name),
 
@@ -262,6 +265,7 @@ CREATE TABLE Item
     ON UPDATE CASCADE
     ON DELETE CASCADE
  );
+
 
 CREATE TABLE StationItem
  (
@@ -307,5 +311,50 @@ SELECT  station_id,
  WHERE  supply_price > 0
 ;
 
-COMMIT;
 
+--
+-- The next two tables (FDevShipyard, FDevOutfitting) are
+-- used to map the FDev API IDs to data ready for EDDN.
+--
+-- The column names are the same as the header line from
+-- the EDCD/FDevIDs csv files, so we can just download the
+-- files (shipyard.csv, outfitting.csv) and save them
+-- as (FDevShipyard.csv, FDevOutfitting.csv) into the
+-- data directory.
+--
+-- see https://github.com/EDCD/FDevIDs
+--
+-- The commodity.csv is not needed because TD and EDDN
+-- are using the same names.
+--
+-- -Bernd
+
+CREATE TABLE FDevShipyard
+ (
+   id INTEGER NOT NULL,
+   name VARCHAR(40) COLLATE nocase,
+
+   UNIQUE (id)
+ );
+
+
+CREATE TABLE FDevOutfitting
+ (
+   id INTEGER NOT NULL,
+   category CHAR(10)
+      CHECK (category IN ('hardpoint','internal','standard','utility')),
+   name VARCHAR(40) COLLATE nocase,
+   mount CHAR(10)
+      CHECK (mount IN (NULL, 'Fixed','Gimballed','Turreted')),
+   guidance CHAR(10)
+      CHECK (guidance IN (NULL, 'Dumbfire','Seeker','Swarm')),
+   ship VARCHAR(40) COLLATE nocase,
+   class CHAR(1) NOT NULL,
+   rating CHAR(1) NOT NULL,
+   entitlement CHAR(10),
+
+   UNIQUE (id)
+ );
+
+
+COMMIT;
