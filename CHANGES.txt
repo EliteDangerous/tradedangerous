@@ -2,6 +2,19 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
+Jul 06 2016 (bgol, horizon branch):
+. Data update from maddavo.
+. New EDCD plugin which also can update the items.
+. Updated EDAPI plugin to version 3.7.2:
+  - Call new EDCD plugin for option 'edcd'
+  - Reworked demmand/supply handling
+  - Added consistency checks for "what" to import compared to what the
+    station should offer.
+
+Jul 05 2016 (bgol, horizon branch):
+. Added category and suppressed to RareItem and updated data.
+. Show "Category/Itemname" if more detail is requested for the "rares" command.
+
 Jul 03 2016 (bgol, horizon branch):
 . New import plugin "netLog" which parses the netLog files and add new
   systems to the database (see README for description).
