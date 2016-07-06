@@ -1897,7 +1897,7 @@ class TradeDB(object):
             SELECT item_id, name, category_id, avg_price, fdev_id
               FROM Item
         """
-        itemByID, itemByName = {}, {}
+        itemByID, itemByName, itemByFDevID = {}, {}, {}
         for ID, name, categoryID, avgPrice, fdevID in self.cur.execute(stmt):
             category = self.categoryByID[categoryID]
             item = Item(
@@ -1907,10 +1907,14 @@ class TradeDB(object):
             )
             itemByID[ID] = item
             itemByName[name] = item
+            if fdevID:
+                itemByFDevID[fdevID] = item
+
             category.items.append(item)
 
         self.itemByID = itemByID
         self.itemByName = itemByName
+        self.itemByFDevID = itemByFDevID
 
         self.tdenv.DEBUG1(
             "Loaded {:n} Items",
