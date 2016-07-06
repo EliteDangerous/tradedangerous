@@ -1,9 +1,9 @@
-!name@System.system_id,name@Station.station_id,unq:name,cost,max_allocation,illegal
-'DEA MOTRONA','Pinzon Dock','Motrona Experience Jelly',7420,10,'Y'
-'DISO','Shifnalport','Diso Ma Corn',335,15,'N'
-'ERANIN','AZEBAN CITY','Eranin Pearl Whisky',1620,8,'Y'
-'HELVETITJ','Friend Orbital','Helvetitj Pearls',3620,6,'N'
-'KORRO KUNG','Lonchakov Orbital','Koro Kung Pellets',240,20,'N'
-'LEESTI','George Lucas','Azure Milk',4123,7,'N'
-'LEESTI','George Lucas','Leestian Evil Juice',457,14,'Y'
-'ZAONCE','Ridley Scott','Leathery Eggs',24350,1,'N'
+!name@System.system_id,name@Station.station_id,name@Category.category_id,unq:name,cost,max_allocation,illegal,suppressed
+'DEA MOTRONA','Pinzon Dock','Legal Drugs','Motrona Experience Jelly',7420,13,'Y','N'
+'DISO','Shifnalport','Foods','Diso Ma Corn',340,15,'N','N'
+'ERANIN','Azeban City','Legal Drugs','Eranin Pearl Whiskey',1620,8,'Y','N'
+'HELVETITJ','Friend Orbital','Metals','Helvetitj Pearls',3620,6,'N','N'
+'KORRO KUNG','Lonchakov Orbital','Chemicals','Koro Kung Pellets',220,20,'N','N'
+'LEESTI','George Lucas','Foods','Azure Milk',4123,7,'N','N'
+'LEESTI','George Lucas','Legal Drugs','Leestian Evil Juice',457,14,'Y','N'
+'ZAONCE','Ridley Scott','Consumer Items','Leathery Eggs',24350,1,'N','N'
