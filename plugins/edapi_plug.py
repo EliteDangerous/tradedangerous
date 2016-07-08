@@ -25,7 +25,7 @@ import transfers
 from collections import namedtuple
 
 
-__version_info__ = ('3', '7', '3')
+__version_info__ = ('3', '7', '4')
 __version__ = '.'.join(__version_info__)
 
 # ----------------------------------------------------------------
@@ -380,8 +380,10 @@ class ImportPlugin(plugins.ImportPluginBase):
         'csvs': 'Merge shipyards into ShipVendor.csv.',
         'name': 'Do not obfuscate commander name for EDDN submit.',
         'save': 'Save the API response (tmp/profile.YYYYMMDD_HHMMSS.json).',
-        'edcd': 'Call the EDCD plugin first',
+        'edcd': 'Call the EDCD plugin first.',
         'eddn': 'Post market, shipyard and outfitting to EDDN.',
+        'test': 'Test the plugin with a json file (test=[FILENAME]).',
+        'warn': 'Ask for station update if a API<->DB diff is encountered.',
     }
 
     cookieFile = "edapi.cookies"
@@ -415,21 +417,24 @@ class ImportPlugin(plugins.ImportPluginBase):
             defShipyard   = station.shipyard
             defOutfitting = station.outfitting
 
+        def tellUserAPIResponse(defName, defValue):
+            if defValue == "Y":
+                tdenv.NOTE("{:>12} in API response", defName)
+            else:
+                tdenv.NOTE("{:>12} NOT in API response", defName)
+
         # defaults from API response are not reliable!
-        if 'commodities' in self.edAPI.profile['lastStarport']:
-            defMarket = "Y"
-        else:
-            defMarket = "N"
-        if 'ships' in self.edAPI.profile['lastStarport']:
-            defShipyard = "Y"
-        else:
-            defShipyard = "N"
-        if 'modules' in self.edAPI.profile['lastStarport']:
-            defOutfitting = "Y"
-        else:
-            defOutfitting = "N"
+        checkStarport = self.edAPI.profile['lastStarport']
+        defMarket     = "Y" if 'commodities' in checkStarport else "N"
+        defShipyard   = "Y" if 'ships'       in checkStarport else "N"
+        defOutfitting = "Y" if 'modules'     in checkStarport else "N"
+        tellUserAPIResponse("'Outfitting'", defOutfitting)
+        tellUserAPIResponse("'ShipYard'", defShipyard)
+        tellUserAPIResponse("'Market'", defMarket)
 
         def warnAPIResponse(checkName, checkYN):
+            # no warning if unknown
+            if checkYN == "?": return False
             warnText = (
                 "The station should{s} have a {what}, "
                 "but the API did{d} return one."
@@ -440,7 +445,7 @@ class ImportPlugin(plugins.ImportPluginBase):
                 s, d = "n't", ""
 
             tdenv.WARN(warnText, what=checkName, s=s, d=d)
-            return True
+            return self.getOption('warn')
 
         if not station:
             print('Station unknown.')
@@ -606,7 +611,29 @@ class ImportPlugin(plugins.ImportPluginBase):
 
         # Connect to the API, authenticate, and pull down the commander
         # /profile.
-        api = EDAPI(cookiefile=str(self.cookiePath))
+        if self.getOption("test"):
+            tdenv.WARN("#############################")
+            tdenv.WARN("###  EDAPI in test mode.  ###")
+            tdenv.WARN("#############################")
+            apiED = namedtuple('EDAPI', ['profile','text'])
+            try:
+                proPath = pathlib.Path(self.getOption("test"))
+            except TypeError:
+                raise plugins.PluginException(
+                    "Option 'test' must be a file name"
+                )
+            if proPath.exists():
+                with proPath.open() as proFile:
+                    api = apiED(
+                        profile = json.load(proFile),
+                        text = '{{"mode":"test","file":"{}"}}'.format(str(proPath))
+                    )
+            else:
+                raise plugins.PluginException(
+                    "JSON-file '{}' not found.".format(str(proPath))
+                )
+        else:
+            api = EDAPI(cookiefile=str(self.cookiePath))
         self.edAPI = api
 
         # Sanity check that the commander is docked. Otherwise we will get a
@@ -807,7 +834,10 @@ class ImportPlugin(plugins.ImportPluginBase):
                 'EDAPI Trade Dangerous Plugin',
                 __version__
             )
-            con._debug = False
+            if self.getOption("test"):
+                con._debug = True
+            else:
+                con._debug = False
 
             if eddn_market:
                 print('Posting commodities to EDDN...')
