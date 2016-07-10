@@ -1,9 +1,10 @@
 !name@System.system_id,name@Station.station_id,name@Category.category_id,unq:name,cost,max_allocation,illegal,suppressed
 'DEA MOTRONA','Pinzon Dock','Legal Drugs','Motrona Experience Jelly',7420,13,'Y','N'
 'DISO','Shifnalport','Foods','Diso Ma Corn',340,15,'N','N'
-'ERANIN','Azeban City','Legal Drugs','Eranin Pearl Whiskey',1620,8,'Y','N'
+'ERANIN','AZEBAN CITY','Legal Drugs','Eranin Pearl Whiskey',1620,8,'Y','N'
 'HELVETITJ','Friend Orbital','Metals','Helvetitj Pearls',3620,6,'N','N'
 'KORRO KUNG','Lonchakov Orbital','Chemicals','Koro Kung Pellets',220,20,'N','N'
 'LEESTI','George Lucas','Foods','Azure Milk',4123,7,'N','N'
 'LEESTI','George Lucas','Legal Drugs','Leestian Evil Juice',457,14,'Y','N'
+'SHINRARTA DEZHRA','Jameson Memorial','Medicines','The Waters of Shintara',7421,12,'N','N'
 'ZAONCE','Ridley Scott','Consumer Items','Leathery Eggs',24350,1,'N','N'
