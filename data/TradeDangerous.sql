@@ -338,6 +338,7 @@ SELECT  station_id,
 CREATE TABLE FDevShipyard
  (
    id INTEGER NOT NULL,
+   symbol VARCHAR(40),
    name VARCHAR(40) COLLATE nocase,
 
    UNIQUE (id)
@@ -347,6 +348,7 @@ CREATE TABLE FDevShipyard
 CREATE TABLE FDevOutfitting
  (
    id INTEGER NOT NULL,
+   symbol VARCHAR(40),
    category CHAR(10)
       CHECK (category IN ('hardpoint','internal','standard','utility')),
    name VARCHAR(40) COLLATE nocase,
