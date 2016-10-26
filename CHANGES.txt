@@ -2,6 +2,18 @@
 TradeDangerous, Copyright (C) Oliver "kfsone" Smith, July 2014
 ==============================================================================
 
+Oct 26 2016 (bgol, horizon branch):
+. New ship "Beluga Liner".
+. Data update from maddavo.
+. Even with zero demandunits the station does pay the price.
+
+Oct 14 2016 (bgol, horizon branch):
+. Data update from maddavo.
+. Updated EDAPI plugin to version 3.7.5:
+  - Updated shipyard to EDDN v2 schema.
+  - Updated outfitting to EDDN v2 schema.
+  - Updated commodity to EDDN v3 schema.
+
 Jul 08 2016 (bgol, horizon branch):
 . Updated EDAPI plugin to version 3.7.4:
   - Let the user know about the API response.
