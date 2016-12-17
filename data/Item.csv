@@ -14,7 +14,6 @@ unq:name@Category.category_id,unq:name,ui_order
 'Consumer Items','Domestic Appliances',3
 'Consumer Items','Evacuation Shelter',4
 'Consumer Items','Survival Equipment',5
-'Consumer Items','Trinkets Of Hidden Fortune',6
 'Foods','Algae',1
 'Foods','Animal Meat',2
 'Foods','Coffee',3
@@ -29,7 +28,7 @@ unq:name@Category.category_id,unq:name,ui_order
 'Industrial Materials','Cooling Hoses',3
 'Industrial Materials','Insulating Membrane',4
 'Industrial Materials','Meta-Alloys',5
-'Industrial Materials','Neofabric Insulation',6
+'Industrial Materials','Micro-weave Cooling Hoses',6
 'Industrial Materials','Polymers',7
 'Industrial Materials','Semiconductors',8
 'Industrial Materials','Superconductors',9
@@ -52,16 +51,16 @@ unq:name@Category.category_id,unq:name,ui_order
 'Machinery','Ion Distributor',11
 'Machinery','Magnetic Emitter Coil',12
 'Machinery','Marine Equipment',13
-'Machinery','Micro-weave Cooling Hoses',15
 'Machinery','Microbial Furnaces',14
-'Machinery','Mineral Extractors',16
-'Machinery','Modular Terminals',17
-'Machinery','Power Converter',18
-'Machinery','Power Generators',19
-'Machinery','Power Transfer Bus',20
-'Machinery','Radiation Baffle',21
-'Machinery','Reinforced Mounting Plate',22
-'Machinery','Skimmer Components',23
+'Machinery','Mineral Extractors',15
+'Machinery','Modular Terminals',16
+'Machinery','Power Converter',17
+'Machinery','Power Generators',18
+'Machinery','Power Transfer Bus',19
+'Machinery','Radiation Baffle',20
+'Machinery','Reinforced Mounting Plate',21
+'Machinery','Skimmer Components',22
+'Machinery','Telemetry Suite',23
 'Machinery','Thermal Cooling Units',24
 'Machinery','Water Purifiers',25
 'Medicines','Advanced Medicines',1
@@ -77,21 +76,20 @@ unq:name@Category.category_id,unq:name,ui_order
 'Metals','Copper',5
 'Metals','Gallium',6
 'Metals','Gold',7
-'Metals','Hafnium 178',8
-'Metals','Indium',9
-'Metals','Lanthanum',10
-'Metals','Lithium',11
-'Metals','Osmium',12
-'Metals','Palladium',13
-'Metals','Platinum',14
-'Metals','Praseodymium',15
-'Metals','Samarium',16
-'Metals','Silver',17
-'Metals','Tantalum',18
-'Metals','Thallium',19
-'Metals','Thorium',20
-'Metals','Titanium',21
-'Metals','Uranium',22
+'Metals','Indium',8
+'Metals','Lanthanum',9
+'Metals','Lithium',10
+'Metals','Osmium',11
+'Metals','Palladium',12
+'Metals','Platinum',13
+'Metals','Praseodymium',14
+'Metals','Samarium',15
+'Metals','Silver',16
+'Metals','Tantalum',17
+'Metals','Thallium',18
+'Metals','Thorium',19
+'Metals','Titanium',20
+'Metals','Uranium',21
 'Minerals','Bauxite',1
 'Minerals','Bertrandite',2
 'Minerals','Bromellite',3
@@ -127,28 +125,32 @@ unq:name@Category.category_id,unq:name,ui_order
 'Salvage','Fossil Remnants',13
 'Salvage','Galactic Travel Guide',14
 'Salvage','Geological Samples',15
-'Salvage','Hostage',16
-'Salvage','Military Intelligence',17
-'Salvage','Military Plans',18
-'Salvage','Mysterious Idol',19
-'Salvage','Occupied CryoPod',20
-'Salvage','Occupied Escape Pod',21
-'Salvage','Personal Effects',22
-'Salvage','Political Prisoner',23
-'Salvage','Prohibited Research Materials',24
-'Salvage','Prototype Tech',25
-'Salvage','Rare Artwork',26
-'Salvage','Rebel Transmissions',27
-'Salvage','Salvageable Wreckage',28
-'Salvage','SAP 8 Core Container',29
-'Salvage','Scientific Research',30
-'Salvage','Scientific Samples',31
-'Salvage','Space Pioneer Relics',32
-'Salvage','Tactical Data',33
-'Salvage','Technical Blueprints',34
-'Salvage','Trade Data',35
-'Salvage','Unknown Artefact',36
-'Salvage','Unstable Data Core',37
+'Salvage','Hafnium 178',16
+'Salvage','Hostage',17
+'Salvage','Large Survey Data Cache',18
+'Salvage','Military Intelligence',19
+'Salvage','Military Plans',20
+'Salvage','Mysterious Idol',21
+'Salvage','Occupied CryoPod',22
+'Salvage','Occupied Escape Pod',23
+'Salvage','Personal Effects',24
+'Salvage','Political Prisoner',25
+'Salvage','Prohibited Research Materials',26
+'Salvage','Prototype Tech',27
+'Salvage','Rare Artwork',28
+'Salvage','Rebel Transmissions',29
+'Salvage','Salvageable Wreckage',30
+'Salvage','SAP 8 Core Container',31
+'Salvage','Scientific Research',32
+'Salvage','Scientific Samples',33
+'Salvage','Space Pioneer Relics',34
+'Salvage','Tactical Data',35
+'Salvage','Technical Blueprints',36
+'Salvage','Trade Data',37
+'Salvage','Trinkets Of Hidden Fortune',38
+'Salvage','Unknown Artefact',39
+'Salvage','Unknown Probe',40
+'Salvage','Unstable Data Core',41
 'Slavery','Imperial Slaves',1
 'Slavery','Slaves',2
 'Technology','Advanced Catalysers',1
@@ -167,7 +169,6 @@ unq:name@Category.category_id,unq:name,ui_order
 'Technology','Resonating Separators',14
 'Technology','Robotics',15
 'Technology','Structural Regulators',16
-'Technology','Telemetry Suite',17
 'Textiles','Conductive Fabrics',1
 'Textiles','Leather',2
 'Textiles','Military Grade Fabrics',3
