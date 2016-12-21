@@ -25,6 +25,11 @@ categories = {
 items = {
 	'POWER TRANSFER CONDUITS': 'Power Transfer Bus',
 	'LOW TEMPERATURE DIAMOND': 'Low Temperature Diamonds'
+#ADD_ITEMS_HERE
+    'coolinghoses': 'Micro-weave Cooling Hoses',
+    'META ALLOYS': 'Meta-Alloys',
+    'MU TOM IMAGER': 'Muon Imager',
+    'SKIMER COMPONENTS': 'Skimmer Components',
 }
 
 def correctSystem(oldName):
