@@ -776,7 +776,7 @@ Frontier provides an API for their mobile app. This can be used to report accura
 ###Basic usage:
 
     trade.py import --plug edapi
-      This will query the API for information abotu your currently docked
+      This will query the API for information about your currently docked
       station and import any market prices and shipyard information
       available. You will be prompted to enter any missing station information.
 
